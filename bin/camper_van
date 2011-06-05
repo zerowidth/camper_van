@@ -1,0 +1,20 @@
+#!/usr/bin/env ruby
+
+require "camper_van"
+
+def usage
+  STDERR.puts "camper_van proxy <server> [port]"
+  exit 1
+end
+
+case ARGV.first
+when nil
+  usage
+when "proxy"
+  usage if ARGV.size == 1
+  if ARGV[2]
+    CamperVan::IrcProxy.run(ARGV[1], ARGV[2].to_i)
+  else
+    CamperVan::IrcProxy.run(ARGV[1])
+  end
+end
