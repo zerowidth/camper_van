@@ -20,4 +20,7 @@ Gem::Specification.new do |s|
 
   s.add_dependency "eventmachine", "~> 0.12.10"
   s.add_dependency "firering", "~> 1.1.0"
+
+  s.add_development_dependency "minitest", "~> 2.2.2"
+  s.add_development_dependency "minitest-rg", "~> 0.4"
 end

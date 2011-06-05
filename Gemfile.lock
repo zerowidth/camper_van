@@ -19,6 +19,9 @@ GEM
       em-http-request (~> 0.3.0)
       eventmachine (~> 0.12.10)
       yajl-ruby (~> 0.7.6)
+    minitest (2.2.2)
+    minitest-rg (0.4)
+      minitest
     yajl-ruby (0.7.9)
 
 PLATFORMS
@@ -26,3 +29,5 @@ PLATFORMS
 
 DEPENDENCIES
   camper_van!
+  minitest (~> 2.2.2)
+  minitest-rg (~> 0.4)
