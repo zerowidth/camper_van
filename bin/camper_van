@@ -9,7 +9,7 @@ end
 
 case ARGV.first
 when nil
-  usage
+  CamperVan::Server.run
 when "proxy"
   usage if ARGV.size == 1
   if ARGV[2]
