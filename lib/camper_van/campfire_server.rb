@@ -20,6 +20,12 @@ module CamperVan
       @active = true
     end
 
+    def campfire
+      @campfire ||= Firering::Connection.new("http://#{subdomain}.campfirenow.com") do |c|
+        c.token = api_key
+      end
+    end
+
     def receive_line(line)
       cmd = parse(line)
       handle cmd
