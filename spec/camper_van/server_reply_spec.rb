@@ -20,7 +20,6 @@ describe CamperVan::ServerReply do
   end
 
   describe "#numeric_reply" do
-
     it "sends the coded command from the server" do
       @server.numeric_reply(:rpl_welcome, ":welcome")
       @server.sent.first.must_equal ":camper_van 001 nathan :welcome"
@@ -38,4 +37,17 @@ describe CamperVan::ServerReply do
       @server.sent.first.must_equal ":camper_van NOTICE nickname :hello there"
     end
   end
+
+  describe "#user_reply" do
+    it "replies with the given command directed to the user" do
+      @server.user_reply :join, "#chan"
+      @server.sent.first.must_equal ":nathan!nathan@localhost JOIN #chan"
+    end
+
+    it "prefixes the final argument with : if it has spaces" do
+      @server.user_reply :privmsg, "#chan", "hello world"
+      @server.sent.first.must_equal ":nathan!nathan@localhost PRIVMSG #chan :hello world"
+    end
+  end
+
 end
