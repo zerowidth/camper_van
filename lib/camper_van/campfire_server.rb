@@ -81,9 +81,33 @@ module CamperVan
       command_reply :pong, *args
     end
 
-    # TODO support for ISON, used by linkinus
-    handle :ison do |args|
-      # numeric_reply :rpl_ison, *args
+    handle :list do |args|
+      begin
+        # hooray async code: have to do gymnastics to make this appear
+        # sequential.
+        campfire.rooms do |rooms|
+          sent = 0
+          rooms.each do |room|
+            name = "#" + irc_name(room.name)
+            topic = room.topic
+            room.users do |users|
+              numeric_reply :rpl_list, name, users.size, topic
+              sent += 1
+              if sent == rooms.size
+                numeric_reply :rpl_listend, "End of list"
+              end
+            end
+          end
+        end
+      rescue Firering::Connection::HTTPError => e
+        shutdown
+      end
+    end
+
+    handle :join do |args|
+      args.each do |channel|
+        join_channel channel
+      end
     end
 
     def send_welcome
@@ -115,6 +139,46 @@ module CamperVan
         numeric_reply :rpl_motd, ":- #{line.strip}"
       end
       numeric_reply :rpl_endofmotd, "END of MOTD"
+    end
+
+    # TODO make irc-safe substitutions, etc.
+    def irc_name(name)
+      name.gsub('/', '-').
+        gsub(/([A-Z]+)([A-Z][a-z])/,'\1_\2').
+        gsub(/([a-z\d])([A-Z])/,'\1_\2').
+        gsub(/\s+/, "_").
+        tr("-", "_").
+        downcase
+    end
+
+    def join_channel(channel)
+      campfire.rooms do |rooms|
+        if room = rooms.detect { |r| "#" + irc_name(r.name) == channel }
+          if room.locked?
+            numeric_reply :err_inviteonlychan, "Cannot join #{channel} (locked)"
+          elsif room.full?
+            numeric_reply :err_channelisfull, "Cannot join #{channel} (full)"
+          else
+            # good to go!
+            room.join do
+              room.users do |users|
+                user_reply :join, ":#{channel}"
+                numeric_reply :rpl_topic, channel, ':' + room.topic
+                # will include myself, now that i've joined explicitly
+                # TODO force nick change to match campfire nick based on
+                # auth key / "me" value -- do this at registration time
+                users.each_slice(10) do |list|
+                  names = list.map { |u| irc_name(u.name) }.join(" ")
+                  numeric_reply :rpl_namereply, "=", channel, ":#{names}"
+                end
+                numeric_reply :rpl_endofnames, channel, "End of /NAMES list."
+              end
+            end
+          end
+        else
+          numeric_reply :err_unavailresource, "That's not a campfire room!"
+        end
+      end
     end
 
   end
