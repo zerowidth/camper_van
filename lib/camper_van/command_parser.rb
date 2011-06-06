@@ -29,11 +29,12 @@ module CamperVan
             break
           else
             args << $1
+            line = line[$1.size..-1]
+            line = line.sub(/^\s+/,"")
           end
         else
           break
         end
-        line.sub! /^#{$1}\s*/, ""
       end
 
       return {cmd.downcase.to_sym => args }

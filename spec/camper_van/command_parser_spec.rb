@@ -31,6 +31,10 @@ describe CamperVan::CommandParser do
         :privmsg => ["#chan", "hello there"]
       )
     end
+
+    it "parses a MODE command" do
+      @parser.parse("MODE +i").must_equal :mode => ["+i"]
+    end
   end
 
 end
