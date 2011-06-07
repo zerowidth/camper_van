@@ -14,6 +14,7 @@ module CamperVan
     include CommandDefinition
     include CommandParser
     include ServerReply
+    include Utils
 
     def initialize(client)
       @client = client
