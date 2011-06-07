@@ -32,13 +32,16 @@ module CamperVan
       :rpl_endofnames => "366",
 
       # errors
+      :err_nosuchnick => "401", # no privmsgs to nicks allowed
+      :err_nosuchchannel => "403", # no such channel yo
+
       :err_nonicknamegiven => "413",
       :err_needmoreparams => "461",
       :err_passwdmismatch => "464",
-      # couldn't join the channel, it's locked
-      :err_channelisfull => "471",
-      :err_inviteonlychan => "473",
-      :err_unavailresource => "437"
+
+      :err_channelisfull => "471", # room is full
+      :err_inviteonlychan => "473", # couldn't join the room, it's locked
+      :err_unavailresource => "437" # no such room!
     }
 
     def numeric_reply(code, *args)
@@ -53,6 +56,10 @@ module CamperVan
 
     def user_reply(command, *args)
       send_line ":#{nick}!#{user}@#{host} #{command.to_s.upcase}" << reply_args(args)
+    end
+
+    def campfire_reply(command, username, *args)
+      send_line ":#{username}!#{username}@campfire #{command.to_s.upcase}" << reply_args(args)
     end
 
     private

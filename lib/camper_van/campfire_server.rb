@@ -4,6 +4,7 @@ module CamperVan
   class CampfireServer
     attr_reader :client
     attr_reader :subdomain, :api_key, :nick, :user, :host
+    attr_reader :active_channels
 
     MOTD = <<-motd
       Welcome to CamperVan.
@@ -19,6 +20,7 @@ module CamperVan
     def initialize(client)
       @client = client
       @active = true
+      @active_channels = {}
     end
 
     def campfire
@@ -31,7 +33,7 @@ module CamperVan
       cmd = parse(line)
       handle cmd
     rescue HandlerMissing
-      puts "* skipping #{cmd.inspect}: no handler"
+      puts "* ignoring #{cmd.inspect}: no handler"
     end
 
     def send_line(line)
@@ -41,6 +43,10 @@ module CamperVan
     def shutdown
       @active = false
       client.close_connection
+    end
+
+    def unbind
+      # send PART messages, etc.
     end
 
     handle :pass do |args|
@@ -111,6 +117,24 @@ module CamperVan
       end
     end
 
+    handle :part do |args|
+      name = args.first
+      if channel = active_channels[name]
+        channel.part
+      else
+        numeric_reply
+      end
+    end
+
+    handle :privmsg do |args|
+      name, msg = *args
+      if channel = active_channels[name]
+        channel.privmsg msg
+      else
+        numeric_reply :err_nonicknamegiven, name, "No such nick/channel"
+      end
+    end
+
     def send_welcome
       hostname = Socket.gethostname
       numeric_reply :rpl_welcome, "Welcome to CamperVan, #{nick}!#{user}@#{host}"
@@ -142,42 +166,15 @@ module CamperVan
       numeric_reply :rpl_endofmotd, "END of MOTD"
     end
 
-    # TODO make irc-safe substitutions, etc.
-    def irc_name(name)
-      name.gsub('/', '-').
-        gsub(/([A-Z]+)([A-Z][a-z])/,'\1_\2').
-        gsub(/([a-z\d])([A-Z])/,'\1_\2').
-        gsub(/\s+/, "_").
-        tr("-", "_").
-        downcase
-    end
-
-    def join_channel(channel)
+    def join_channel(name)
       campfire.rooms do |rooms|
-        if room = rooms.detect { |r| "#" + irc_name(r.name) == channel }
-          if room.locked?
-            numeric_reply :err_inviteonlychan, "Cannot join #{channel} (locked)"
-          elsif room.full?
-            numeric_reply :err_channelisfull, "Cannot join #{channel} (full)"
-          else
-            # good to go!
-            room.join do
-              room.users do |users|
-                user_reply :join, ":#{channel}"
-                numeric_reply :rpl_topic, channel, ':' + room.topic
-                # will include myself, now that i've joined explicitly
-                # TODO force nick change to match campfire nick based on
-                # auth key / "me" value -- do this at registration time
-                users.each_slice(10) do |list|
-                  names = list.map { |u| irc_name(u.name) }.join(" ")
-                  numeric_reply :rpl_namereply, "=", channel, ":#{names}"
-                end
-                numeric_reply :rpl_endofnames, channel, "End of /NAMES list."
-              end
-            end
+        if room = rooms.detect { |r| "#" + irc_name(r.name) == name }
+          channel = Channel.new(name, self, room)
+          if channel.join
+            active_channels[name] = channel
           end
         else
-          numeric_reply :err_unavailresource, "That's not a campfire room!"
+          numeric_reply :err_nosuchchannel, name, "No such campfire room!"
         end
       end
     end
