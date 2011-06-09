@@ -20,9 +20,19 @@ describe CamperVan::CampfireServer do
     end
   end
 
+  class TestCampfireServer < CamperVan::CampfireServer
+    attr_writer :campfire
+  end
+
   before :each do
     @connection = TestConnection.new
-    @server = CamperVan::CampfireServer.new(@connection)
+    @server = TestCampfireServer.new(@connection)
+
+    @server.campfire = Class.new do
+      def user(*args)
+        yield OpenStruct.new(:name => "Nathan")
+      end
+    end.new
   end
 
   describe "#handle" do
@@ -56,6 +66,14 @@ describe CamperVan::CampfireServer do
       @connection.sent.first.must_match /^:camper_van 001 nathan/
     end
 
+    it "forces a nick change to match the campfire user if it doesn't match" do
+      @server.handle :pass => ["test:1234asdf"]
+      @server.handle :nick => ["bob"]
+      @server.handle :user => ["nathan", 0, 0, "Nathan"]
+      line = @connection.sent.detect { |c| c =~ /NICK/ }
+      line.must_match /NICK nathan/
+    end
+
     context "when registered" do
       before :each do
         @server.handle :pass => ["test:1234asdf"]
@@ -71,22 +89,22 @@ describe CamperVan::CampfireServer do
     context "with a MODE command" do
 
       before :each do
-        @campfire = MiniTest::Mock.new
+        @channel = MiniTest::Mock.new
 
         # register
         @server.handle :pass => ["test:1234asdf"]
         @server.handle :nick => ["nathan"]
         @server.handle :user => ["nathan", 0, 0, "Nathan"]
 
-        @server.active_channels["#test"] = @campfire
+        @server.active_channels["#test"] = @channel
       end
 
       after :each do
-        @campfire.verify
+        @channel.verify
       end
 
       it "asks the channel to send its mode" do
-        @campfire.expect :current_mode, nil
+        @channel.expect :current_mode, nil
         @server.handle :mode => ["#test"]
       end
 
@@ -94,22 +112,22 @@ describe CamperVan::CampfireServer do
 
     context "with a WHO command" do
       before :each do
-        @campfire = MiniTest::Mock.new
+        @channel = MiniTest::Mock.new
 
         # register
         @server.handle :pass => ["test:1234asdf"]
         @server.handle :nick => ["nathan"]
         @server.handle :user => ["nathan", 0, 0, "Nathan"]
 
-        @server.active_channels["#test"] = @campfire
+        @server.active_channels["#test"] = @channel
       end
 
       after :each do
-        @campfire.verify
+        @channel.verify
       end
 
       it "asks campfire for a list of users" do
-        @campfire.expect(:list_users, nil)
+        @channel.expect(:list_users, nil)
         @server.handle :who => ["#test"]
       end
 

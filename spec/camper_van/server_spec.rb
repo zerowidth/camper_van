@@ -31,10 +31,12 @@ describe CamperVan::Server do
   end
 
   describe "#receive_line" do
-    it "allows for correct registration" do
-      @server.receive_line "PASS asdfjkl"
-      @server.receive_line "NICK nathan"
-      @server.receive_line "USER nathan 0 0 :Nathan"
+    it "allows for a failed attempt at registration" do
+      @server.receive_line "PASS invalid"
+      @server.receive_line "NICK nathan" # ignored
+      @server.receive_line "USER nathan 0 0 :Nathan" # ignored
+
+      @server.sent.first.must_match /must specify/
     end
   end
 

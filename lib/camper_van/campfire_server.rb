@@ -30,8 +30,10 @@ module CamperVan
     end
 
     def receive_line(line)
-      cmd = parse(line)
-      handle cmd
+      if @active
+        cmd = parse(line)
+        handle cmd
+      end
     rescue HandlerMissing
       puts "* ignoring #{cmd.inspect}: no handler"
     end
@@ -76,8 +78,10 @@ module CamperVan
         unless @api_key
           command_reply :notice, "AUTH", "*** must specify campfire API key as password ***"
           shutdown
+          return
         end
 
+        check_nick_matches_authenticated_user
         send_welcome
         send_luser_info
         send_motd
@@ -134,7 +138,7 @@ module CamperVan
       if channel = active_channels[name]
         channel.part
       else
-        numeric_reply # TODO some error
+        numeric_reply :err_notonchannel, "You're not on that channel"
       end
     end
 
@@ -152,6 +156,23 @@ module CamperVan
         channel.current_mode
       else
         # no good error message for this situation, so ignore it
+      end
+    end
+
+    handle :away do |args|
+      # ignore, no campfire API for this
+    end
+
+    # Check to see that the nick as provided during the registration
+    # process matches the authenticated campfire user. If the nicks don't
+    # match, send a nick change to the connected client.
+    def check_nick_matches_authenticated_user
+      campfire.user("me") do |user|
+        name = irc_name user.name
+        if name != nick
+          user_reply :nick, name
+          @nick = name
+        end
       end
     end
 

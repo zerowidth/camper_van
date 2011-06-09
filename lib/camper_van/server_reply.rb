@@ -5,48 +5,52 @@ module CamperVan
     NUMERIC_REPLIES = {
 
       # successful registration / welcome to the network
-      :rpl_welcome => "001",
-      :rpl_yourhost => "002",
-      :rpl_created => "003",
-      :rpl_myinfo => "004",
+      :rpl_welcome            => "001",
+      :rpl_yourhost           => "002",
+      :rpl_created            => "003",
+      :rpl_myinfo             => "004",
 
       # more welcome messages
-      :rpl_luserclient => "251",
-      :rpl_luserop => "252",
-      :rpl_luserchannels => "254",
-      :rpl_luserme => "255",
+      :rpl_luserclient        => "251",
+      :rpl_luserop            => "252",
+      :rpl_luserchannels      => "254",
+      :rpl_luserme            => "255",
 
       # MOTD
-      :rpl_motdstart => "375",
-      :rpl_motd => "372",
-      :rpl_endofmotd => "376",
+      :rpl_motdstart          => "375",
+      :rpl_motd               => "372",
+      :rpl_endofmotd          => "376",
 
       # MODE
       :rpl_channelmodeis      => "324",
 
       # room listing
-      :rpl_list => "322",
-      :rpl_listend => "323",
-      :rpl_whoreply => "352",
-      :rpl_endofwho => "315",
+      :rpl_list               => "322",
+      :rpl_listend            => "323",
+      :rpl_whoreply           => "352",
+      :rpl_endofwho           => "315",
 
       # channel joins
-      :rpl_notopic => "331",
-      :rpl_topic => "332",
-      :rpl_namereply => "353",
-      :rpl_endofnames => "366",
+      :rpl_notopic            => "331",
+      :rpl_topic              => "332",
+      :rpl_namereply          => "353",
+      :rpl_endofnames         => "366",
 
       # errors
-      :err_nosuchnick => "401", # no privmsgs to nicks allowed
-      :err_nosuchchannel => "403", # no such channel yo
+      :err_nosuchnick         => "401", # no privmsgs to nicks allowed
+      :err_nosuchchannel      => "403", # no such channel yo
 
-      :err_nonicknamegiven => "413",
-      :err_needmoreparams => "461",
-      :err_passwdmismatch => "464",
+      :err_nonicknamegiven    => "413",
 
-      :err_channelisfull => "471", # room is full
-      :err_inviteonlychan => "473", # couldn't join the room, it's locked
-      :err_unavailresource => "437" # no such room!
+      :err_notonchannel       => "442",
+
+      :err_needmoreparams     => "461",
+      :err_passwdmismatch     => "464",
+
+      :err_channelisfull      => "471", # room is full
+      :err_inviteonlychan     => "473", # couldn't join the room, it's locked
+      :err_unavailresource    => "437" # no such room!
+
     }
 
     def numeric_reply(code, *args)
