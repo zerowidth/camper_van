@@ -15,20 +15,51 @@ module CamperVan
     end
 
     module ClassMethods
-      def handle(command, &block)
-        command_registry[command] = block
-      end
 
-      def command_registry
-        @command_registry ||= {}
+      # Public: defines a handler for the given irc command
+      #
+      # command - the irc command to define a handler for
+      #
+      # Example:
+      #
+      #   handle :nick do |args|
+      #     # ... change nickname to ...
+      #   end
+      #
+      # ```
+      # def handle_nick(*args)
+      #   # contents of block
+      # end
+      # ```
+      def handle(command, &block)
+        define_method "handle_#{command}".to_sym, &block
       end
     end
 
     module InstanceMethods
+
+      # Public: handles the given command using the handler method
+      # defined by the class-level handler metaprogramming, if it
+      # exists.
+      #
+      # command - the Hash command as provided by the irc command parser
+      #
+      # Example:
+      #
+      #   handle :nick => ["joe"]
+      #
+      # Raises CamperVan::HandlerMissing if there is no handler method
+      #   defined for the given command.
       def handle(command)
         name, args = command.to_a.first
-        if block = self.class.command_registry[name]
-          instance_exec(args, &block)
+        method_name = "handle_#{name}".to_sym
+        if self.respond_to? method_name
+          m = method(method_name)
+          if m.arity > 0
+            send method_name, args
+          else
+            send method_name
+          end
         else
           raise CamperVan::HandlerMissing, command
         end

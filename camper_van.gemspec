@@ -5,7 +5,6 @@ require "camper_van/version"
 Gem::Specification.new do |s|
   s.name        = "camper_van"
   s.version     = CamperVan::VERSION
-  s.required_ruby_version = ">= 1.9.2"
   s.authors     = ["Nathan Witmer"]
   s.email       = ["nwitmer@gmail.com"]
   s.homepage    = ""
