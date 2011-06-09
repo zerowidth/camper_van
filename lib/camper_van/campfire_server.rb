@@ -149,12 +149,9 @@ module CamperVan
 
     handle :mode do |args|
       if channel = active_channels[args.first]
-        # channel.privmsg msg
+        channel.current_mode
       else
-        # ERR_NEEDMOREPARAMS
-        # ERR_UNKNOWNMODE
-        # RPL_CHANNELMODEIS
-        # numeric_reply :err_nonicknamegiven, name, "No such nick/channel"
+        # no good error message for this situation, so ignore it
       end
     end
 

@@ -15,16 +15,20 @@ describe CamperVan::Channel do
   end
 
   class TestRoom
-    attr_reader :locked, :full, :topic
-    attr_writer :users, :topic
+    attr_reader :locked, :full, :topic, :membership_limit
+    attr_writer :users, :topic, :locked, :full, :open_to_guests
     def initialize
       @users = []
+      @membership_limit = 12
     end
     def locked?
       @locked
     end
     def full?
       @full
+    end
+    def open_to_guests?
+      @open_to_guests
     end
     def join
       yield
@@ -49,9 +53,6 @@ describe CamperVan::Channel do
   end
 
   describe "#join" do
-    before :each do
-    end
-
     it "sends a user join as the command" do
       @channel.join
       @client.sent.first.must_equal ":nathan!nathan@localhost JOIN :#test"
@@ -78,6 +79,29 @@ describe CamperVan::Channel do
         ":camper_van 352 nathan #test user example.com camper_van joe H :0 Joe"
       )
       @client.sent.last.must_match /:camper_van 315 nathan #test :End/
+    end
+  end
+
+  describe "#current_mode" do
+    it "sends the current mode to the client" do
+      @channel.current_mode
+      @client.sent.last.must_match ":camper_van 324 nathan #test +ls 12"
+    end
+
+    context "and a locked room" do
+      it "includes +i mode" do
+        @room.locked = true
+        @channel.current_mode
+        @client.sent.last.must_match ":camper_van 324 nathan #test +ils 12"
+      end
+    end
+
+    context "and a room that allows guests" do
+      it "drops the +s from the mode" do
+        @room.open_to_guests = true
+        @channel.current_mode
+        @client.sent.last.must_match ":camper_van 324 nathan #test +l 12"
+      end
     end
   end
 

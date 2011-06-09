@@ -68,6 +68,30 @@ describe CamperVan::CampfireServer do
       # end
     end
 
+    context "with a MODE command" do
+
+      before :each do
+        @campfire = MiniTest::Mock.new
+
+        # register
+        @server.handle :pass => ["test:1234asdf"]
+        @server.handle :nick => ["nathan"]
+        @server.handle :user => ["nathan", 0, 0, "Nathan"]
+
+        @server.active_channels["#test"] = @campfire
+      end
+
+      after :each do
+        @campfire.verify
+      end
+
+      it "asks the channel to send its mode" do
+        @campfire.expect :current_mode, nil
+        @server.handle :mode => ["#test"]
+      end
+
+    end
+
     context "with a WHO command" do
       before :each do
         @campfire = MiniTest::Mock.new
@@ -80,11 +104,13 @@ describe CamperVan::CampfireServer do
         @server.active_channels["#test"] = @campfire
       end
 
+      after :each do
+        @campfire.verify
+      end
+
       it "asks campfire for a list of users" do
         @campfire.expect(:list_users, nil)
         @server.handle :who => ["#test"]
-
-        @campfire.verify
       end
 
       it "returns 'end of list' only when an invalid channel is specified" do

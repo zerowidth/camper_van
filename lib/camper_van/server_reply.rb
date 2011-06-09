@@ -21,6 +21,9 @@ module CamperVan
       :rpl_motd => "372",
       :rpl_endofmotd => "376",
 
+      # MODE
+      :rpl_channelmodeis      => "324",
+
       # room listing
       :rpl_list => "322",
       :rpl_listend => "323",

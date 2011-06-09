@@ -71,6 +71,14 @@ module CamperVan
     end
 
     def start_streaming
+    # Public: sends the current channel mode to the client
+    def current_mode
+      n = room.membership_limit
+      s = room.open_to_guests? ? "" : "s"
+      i = room.locked? ? "i" : ""
+      client.numeric_reply :rpl_channelmodeis, channel, "+#{i}l#{s}", n
+    end
+
       @stream = room.stream do |message|
         case
         when message.advertisement?
