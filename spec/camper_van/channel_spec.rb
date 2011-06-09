@@ -70,6 +70,17 @@ describe CamperVan::Channel do
     end
   end
 
+  describe "#list_users" do
+    it "retrieves a list of users and sends them to the client" do
+      @room.users = [OpenStruct.new(:name => "Joe", :email_address => "user@example.com")]
+      @channel.list_users
+      @client.sent.first.must_equal(
+        ":camper_van 352 nathan #test user example.com camper_van joe H :0 Joe"
+      )
+      @client.sent.last.must_match /:camper_van 315 nathan #test :End/
+    end
+  end
+
   describe "when streaming" do
     # ...
   end

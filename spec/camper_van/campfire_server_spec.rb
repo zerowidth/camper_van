@@ -66,7 +66,31 @@ describe CamperVan::CampfireServer do
       # it "connects to the campfire API" do
       #   skip "campfire api next!"
       # end
+    end
 
+    context "with a WHO command" do
+      before :each do
+        @campfire = MiniTest::Mock.new
+
+        # register
+        @server.handle :pass => ["test:1234asdf"]
+        @server.handle :nick => ["nathan"]
+        @server.handle :user => ["nathan", 0, 0, "Nathan"]
+
+        @server.active_channels["#test"] = @campfire
+      end
+
+      it "asks campfire for a list of users" do
+        @campfire.expect(:list_users, nil)
+        @server.handle :who => ["#test"]
+
+        @campfire.verify
+      end
+
+      it "returns 'end of list' only when an invalid channel is specified" do
+        @server.handle :who => ["#invalid"]
+        @connection.sent.last.must_match /^:camper_van 315 nathan #invalid :End/
+      end
     end
 
   end

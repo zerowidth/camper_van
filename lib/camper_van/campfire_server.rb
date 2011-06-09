@@ -111,6 +111,18 @@ module CamperVan
       end
     end
 
+    handle :who do |args|
+      if channel = active_channels[args.first]
+        channel.list_users
+      else
+        if args.empty?
+          numeric_reply :rpl_endofwho, "End of WHO list"
+        else
+          numeric_reply :rpl_endofwho, args.first, "End of WHO list"
+        end
+      end
+    end
+
     handle :join do |args|
       args.each do |channel|
         join_channel channel
@@ -122,7 +134,7 @@ module CamperVan
       if channel = active_channels[name]
         channel.part
       else
-        numeric_reply
+        numeric_reply # TODO some error
       end
     end
 
@@ -132,6 +144,17 @@ module CamperVan
         channel.privmsg msg
       else
         numeric_reply :err_nonicknamegiven, name, "No such nick/channel"
+      end
+    end
+
+    handle :mode do |args|
+      if channel = active_channels[args.first]
+        # channel.privmsg msg
+      else
+        # ERR_NEEDMOREPARAMS
+        # ERR_UNKNOWNMODE
+        # RPL_CHANNELMODEIS
+        # numeric_reply :err_nonicknamegiven, name, "No such nick/channel"
       end
     end
 

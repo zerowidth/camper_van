@@ -45,6 +45,23 @@ module CamperVan
       # room.leave # ehhhh let the timeout do it
     end
 
+    # Replies to a WHO command with a list of users,
+    # including their nicks, names, and status.
+    #
+    # For WHO response http://www.mircscripts.org/forums.php?cid=3&id=159227
+    # In short, H = here, G = away
+    def list_users
+      room.users do |users|
+        users.each do |user|
+          account, server = user.email_address.split("@")
+          nick = irc_name(user.name)
+          client.numeric_reply :rpl_whoreply, channel, account, server,
+            "camper_van", nick, "H", ":0 #{user.name}"
+        end
+        client.numeric_reply :rpl_endofwho, channel, "End of WHO list"
+      end
+    end
+
     # TODO away message?
 
     # TODO handle multiple rapid messages for auto-pasting, or
@@ -99,7 +116,7 @@ module CamperVan
         when message.upload?
           # ACTION "uploaded #{filename}: #{url}
         else
-          puts "* skipping #{message.inspect}"
+          puts "* skipping message #{message.type}: #{message.inspect}"
         end
       end
     end

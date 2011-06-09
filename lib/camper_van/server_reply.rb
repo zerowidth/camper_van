@@ -24,6 +24,8 @@ module CamperVan
       # room listing
       :rpl_list => "322",
       :rpl_listend => "323",
+      :rpl_whoreply => "352",
+      :rpl_endofwho => "315",
 
       # channel joins
       :rpl_notopic => "331",
