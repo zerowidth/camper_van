@@ -13,8 +13,8 @@ when nil
 when "proxy"
   usage if ARGV.size == 1
   if ARGV[2]
-    CamperVan::IrcProxy.run(ARGV[1], ARGV[2].to_i)
+    CamperVan::DebugProxy.run(ARGV[1], ARGV[2].to_i)
   else
-    CamperVan::IrcProxy.run(ARGV[1])
+    CamperVan::DebugProxy.run(ARGV[1])
   end
 end

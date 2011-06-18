@@ -4,7 +4,7 @@ require "eventmachine"
 require "firering"
 
 module CamperVan
-  require "camper_van/irc_proxy"          # debug proxy
+  require "camper_van/debug_proxy"        # debug proxy
   require "camper_van/utils"              # utility methods
   require "camper_van/command_parser"     # irc command parser
   require "camper_van/command_definition" # command definition and processing

@@ -1,17 +1,17 @@
 # debug proxy for dumping all irc traffic between a client and a server
 module CamperVan
-  class IrcProxy < EM::Connection
+  class DebugProxy < EM::Connection
     include EM::Protocols::LineText2
 
     def self.run(server, server_port=6667)
       EM.run do
-        EM.start_server "localhost", 6667, IrcProxy, server, server_port
+        EM.start_server "localhost", 6667, DebugProxy, server, server_port
         puts "* waiting for connections..."
-      end
 
-      trap("INT") do
-        puts "* shutting down"
-        EM.stop
+        trap("INT") do
+          puts "* shutting down"
+          EM.stop
+        end
       end
     end
 
