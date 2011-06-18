@@ -16,9 +16,14 @@ describe CamperVan::Channel do
 
   class TestRoom
     attr_reader :locked, :full, :topic, :membership_limit
+    attr_reader :sent
+
     attr_writer :users, :topic, :locked, :full, :open_to_guests
+    attr_writer :stream
+
     def initialize
       @users = []
+      @sent = []
       @membership_limit = 12
     end
     def locked?
@@ -36,10 +41,16 @@ describe CamperVan::Channel do
     def users
       yield @users if @users
     end
+
+    def text(line)
+      @sent << line
+    end
+
     def stream
       if @messages
         @messages.each { |m| yield m }
       end
+      return @stream
     end
   end
 
@@ -71,6 +82,22 @@ describe CamperVan::Channel do
     end
   end
 
+  describe "#part" do
+    it "sends a part command to the client" do
+      @channel.part
+      @client.sent.last.must_match /PART #test/
+    end
+
+    it "closes the connection on the stream" do
+      @room.stream = MiniTest::Mock.new
+      @room.stream.expect(:close_connection, nil)
+      @channel.stream_campfire_to_channel # sets up stream
+      @channel.part
+
+      @room.stream.verify
+    end
+  end
+
   describe "#list_users" do
     it "retrieves a list of users and sends them to the client" do
       @room.users = [OpenStruct.new(:name => "Joe", :email_address => "user@example.com")]
@@ -79,6 +106,18 @@ describe CamperVan::Channel do
         ":camper_van 352 nathan #test user example.com camper_van joe H :0 Joe"
       )
       @client.sent.last.must_match /:camper_van 315 nathan #test :End/
+    end
+  end
+
+  describe "#privmsg" do
+    it "sends the message as text to the room" do
+      @channel.privmsg "hello world"
+      @room.sent.first.must_equal "hello world"
+    end
+
+    it "converts ACTION messages to campfire-appropriate messages" do
+      @channel.privmsg "\01ACTION runs away\01"
+      @room.sent.first.must_equal "*runs away*"
     end
   end
 

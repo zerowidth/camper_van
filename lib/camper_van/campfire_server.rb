@@ -111,6 +111,11 @@ module CamperVan
           end
         end
       rescue Firering::Connection::HTTPError => e
+        # since this is the first thing that gets run on
+        # a successful join, die here if it fails.
+        # TODO move this somewhere better, and also display
+        # proper error messages if authentication doesn't work
+        # (or if the "is-authed" check already happens somewhere else)
         shutdown
       end
     end
@@ -139,6 +144,17 @@ module CamperVan
         channel.part
       else
         numeric_reply :err_notonchannel, "You're not on that channel"
+      end
+    end
+
+    handle :topic do |args|
+      name, new_topic = *args
+      if channel = active_channels[name]
+        if new_topic
+          channel.set_topic new_topic
+        else
+          channel.current_topic
+        end
       end
     end
 
