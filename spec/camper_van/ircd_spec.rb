@@ -1,6 +1,6 @@
 require "spec_helper"
 
-describe CamperVan::CampfireServer do
+describe CamperVan::IRCD do
   class TestConnection
     attr_reader :sent
 
@@ -20,13 +20,13 @@ describe CamperVan::CampfireServer do
     end
   end
 
-  class TestCampfireServer < CamperVan::CampfireServer
+  class TestIRCD < CamperVan::IRCD
     attr_writer :campfire
   end
 
   before :each do
     @connection = TestConnection.new
-    @server = TestCampfireServer.new(@connection)
+    @server = TestIRCD.new(@connection)
 
     @server.campfire = Class.new do
       def user(*args)
@@ -96,7 +96,7 @@ describe CamperVan::CampfireServer do
         @server.handle :nick => ["nathan"]
         @server.handle :user => ["nathan", 0, 0, "Nathan"]
 
-        @server.active_channels["#test"] = @channel
+        @server.channels["#test"] = @channel
       end
 
       after :each do
@@ -119,7 +119,7 @@ describe CamperVan::CampfireServer do
         @server.handle :nick => ["nathan"]
         @server.handle :user => ["nathan", 0, 0, "Nathan"]
 
-        @server.active_channels["#test"] = @channel
+        @server.channels["#test"] = @channel
       end
 
       after :each do
