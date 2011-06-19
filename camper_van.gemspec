@@ -22,5 +22,5 @@ Gem::Specification.new do |s|
   s.add_dependency "firering", "~> 1.1.0"
 
   s.add_development_dependency "minitest", "~> 2.2.2"
-  s.add_development_dependency "minitest-rg", "~> 0.4"
+  # s.add_development_dependency "minitest-rg"
 end
