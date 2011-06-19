@@ -12,6 +12,9 @@ describe CamperVan::Channel do
     def send_line(line)
       @sent << line
     end
+    def subdomain
+      "subdomain"
+    end
   end
 
   class TestRoom
@@ -26,6 +29,11 @@ describe CamperVan::Channel do
       @sent = []
       @membership_limit = 12
     end
+
+    def id
+      10
+    end
+
     def locked?
       @locked
     end
@@ -145,7 +153,84 @@ describe CamperVan::Channel do
   end
 
   describe "when streaming" do
-    # ...
+    class TestMessage < OpenStruct
+      def user
+        yield OpenStruct.new :name => "Joe"
+      end
+    end
+
+    def msg(type, attributes={})
+      TestMessage.new(
+        attributes.merge :type => "#{type}Message", :id => 1234
+      )
+    end
+
+    it "sends a privmsg with the message when a user says something" do
+      @channel.map_message_to_irc msg("Text", :body => "hello")
+      @client.sent.last.must_match ":joe!joe@campfire PRIVMSG #test hello"
+    end
+
+    it "sends a privmsg with the pasted url and the first line when a user pastes something" do
+      @channel.map_message_to_irc msg("Paste", :body => "foo\nbar\nbaz\nbleh")
+      @client.sent.last.must_match %r(:joe\S+ PRIVMSG #test .*room/10/paste/1234)
+    end
+
+    it "sends a privmsg with an action when a user message is wrapped in *'s" do
+      @channel.map_message_to_irc msg("Text", :body => "*did a thing*")
+      @client.sent.last.must_match /PRIVMSG #test :\x01ACTION did a thing\x01/
+    end
+
+    # it "sends a privmsg with an action when a user plays a sound"
+
+    it "sends a mode change when the room is locked" do
+      @channel.map_message_to_irc msg("Lock")
+      @client.sent.last.must_match %r/:joe\S+ MODE #test \+i/
+    end
+
+    it "sends a mode change when the room is unlocked" do
+      @channel.map_message_to_irc msg("Unlock")
+      @client.sent.last.must_match %r/:joe\S+ MODE #test -i/
+    end
+
+    it "sends a mode change when the room disallows guests" do
+      @channel.map_message_to_irc msg("DisallowGuests")
+      @client.sent.last.must_match %r/:joe\S+ MODE #test \+s/
+    end
+
+    it "sends a mode change when the room allows guests" do
+      @channel.map_message_to_irc msg("AllowGuests")
+      @client.sent.last.must_match %r/:joe\S+ MODE #test -s/
+    end
+
+    it "sends a join command when a user enters the room" do
+      @channel.map_message_to_irc msg("Enter")
+      @client.sent.last.must_match %r/:joe\S+ JOIN #test/
+    end
+
+    it "sends a part command when a user leaves the room" do
+      @channel.map_message_to_irc msg("Leave")
+      @client.sent.last.must_match %r/:joe\S+ PART #test/
+    end
+
+    it "sends a part command when a user is kicked from the room" do
+      @channel.map_message_to_irc msg("Kick")
+      @client.sent.last.must_match %r/:joe\S+ PART #test/
+    end
+
+    # it "sends the tweet url when a user pastes a tweet"
+
+    # TODO not sure if this is correct, needs real-world testing
+    it "sends a topic command when a user changes the topic" do
+      @channel.map_message_to_irc msg("Topic", :body => "new topic")
+      @client.sent.last.must_match ":camper_van 332 nathan #test :new topic"
+    end
+
+    it "sends a message containing the upload link when a user uploads a file" do
+      @channel.map_message_to_irc msg("Upload", :body => "filename")
+      @client.sent.last.must_match %r(:joe\S+ PRIVMSG #test .*uploads/1234/filename)
+    end
+
+    # it "sends a notice with the message when the system sends a message"
   end
 end
 

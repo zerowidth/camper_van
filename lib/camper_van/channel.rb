@@ -35,8 +35,6 @@ module CamperVan
             client.user_reply :join, ":#{channel}"
             client.numeric_reply :rpl_topic, channel, ':' + room.topic
             # will include myself, now that i've joined explicitly
-            # TODO force nick change to match campfire nick based on
-            # auth key / "me" value -- do this at registration time
             users.each_slice(10) do |list|
               names = list.map { |u| irc_name(u.name) }.join(" ")
               client.numeric_reply :rpl_namereply, "=", channel, ":#{names}"
@@ -238,13 +236,11 @@ module CamperVan
         message.user do |user|
           # TODO keep registry of user_id / user lookups
           name = irc_name(user.name)
-          # TODO again, need to set own nick to campfire nick so
-          # this matching will work correctly
           if name == client.nick
             puts "* skipping message from myself: #{message.type} #{message.inspect}"
           else
             if message.body =~ /^\*.*\*$/
-              client.campfire_reply :privmsg, name, channel, ":\01ACTION " + message.body + "\01"
+              client.campfire_reply :privmsg, name, channel, ":\01ACTION " + message.body[1..-2] + "\01"
             else
               client.campfire_reply :privmsg, name, channel, message.body
             end
@@ -258,13 +254,12 @@ module CamperVan
       when "Upload"
         message.user do |user|
           name = irc_name(user.name)
-          client.campfire_reply :privmsg, name, channel, ":\01ACTION uploaded "
+          client.campfire_reply :privmsg, name, channel, ":\01ACTION uploaded " +
             "https://#{client.subdomain}.campfirenow.com/room/#{room.id}/uploads/#{message.id}/#{message.body}"
         end
 
       else
         puts "* unknown message #{message.type}: #{message.inspect}"
-
       end
     end
 
