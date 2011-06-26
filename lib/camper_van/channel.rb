@@ -87,7 +87,7 @@ module CamperVan
     # For WHO response: http://www.mircscripts.org/forums.php?cid=3&id=159227
     # In short, H = here, G = away
     def list_users
-      update_users do
+      update_users(:include_joins_and_parts) do
         users.values.each do |user|
           client.numeric_reply :rpl_whoreply, channel, user.account, user.server,
             "camper_van", user.nick, user.idle? ? "G" : "H", ":0 #{user.name}"
@@ -158,11 +158,17 @@ module CamperVan
 
     # Get the list of users from a room, and update the internal
     # tracking state as well as the connected client. If the user list
-    # is out of sync, the irc client will receive the associated
+    # is out of sync, the irc client may receive the associated
     # JOIN/PART commands.
     #
-    # callback - optional callback after the users have been updated
-    def update_users(&callback)
+    # include_joins_and_parts - whether or not to include JOIN/PART commands if
+    #                           the user list has changed since the last update
+    #                           (defaults to false)
+    # callback                - optional callback after the users have been
+    #                           updated
+    #
+    # Returns nothing, but keeps the users list updated
+    def update_users(include_joins_and_parts=false, &callback)
       room.users do |user_list|
         before = users.dup
         present = {}
@@ -175,14 +181,18 @@ module CamperVan
             #   present[user.id].nick = nick
             # end
           else
-            present[user.id] = User.new(user)
-            # JOIN
+            new_user = present[user.id] = User.new(user)
+            if include_joins_and_parts
+              client.campfire_reply :join, new_user.nick, channel
+            end
           end
+        end
 
-          # Now that the list of users is updated, the remaining users
-          # in 'before' have left. Let the irc client know.
-          before.each do |id, user|
-            # PART remaining users
+        # Now that the list of users is updated, the remaining users
+        # in 'before' have left. Let the irc client know.
+        before.each do |id, user|
+          if include_joins_and_parts
+            client.campfire_reply :part, user.nick, channel
           end
         end
 

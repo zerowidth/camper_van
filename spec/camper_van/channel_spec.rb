@@ -46,8 +46,10 @@ describe CamperVan::Channel do
     def join
       yield
     end
+
     def users
-      yield @users
+      yield @users if block_given?
+      @users
     end
 
     def text(line)
@@ -109,13 +111,37 @@ describe CamperVan::Channel do
   end
 
   describe "#list_users" do
-    it "retrieves a list of users and sends them to the client" do
+    before :each do
       @room.users = [OpenStruct.new(:id => 10, :name => "Joe", :email_address => "user@example.com")]
+      @channel.join
+      @client.sent.clear
+    end
+    it "retrieves a list of users and sends them to the client" do
       @channel.list_users
       @client.sent.first.must_equal(
         ":camper_van 352 nathan #test user example.com camper_van joe H :0 Joe"
       )
       @client.sent.last.must_match /:camper_van 315 nathan #test :End/
+    end
+
+    it "issues JOIN irc commands for users who have joined but aren't yet tracked" do
+      @channel.list_users
+      @room.users << OpenStruct.new(:id => 11, :name => "Bob", :email_address => "bob@example.com")
+      @client.sent.clear
+      @channel.list_users
+      @client.sent.first.must_match /bob.*JOIN #test/
+    end
+
+    it "issues PART commands for users who have left but are still tracked" do
+      @room.users = []
+      @channel.list_users
+      @client.sent.first.must_match /joe.*PART #test/
+    end
+
+    it "shows a user as away if they are idle" do
+      @channel.users[10].idle = true
+      @channel.list_users
+      @client.sent.first.must_match /joe G :0 Joe/
     end
   end
 
@@ -157,7 +183,7 @@ describe CamperVan::Channel do
   describe "when streaming" do
     class TestMessage < OpenStruct
       def user
-        yield OpenStruct.new :name => "Joe"
+        yield OpenStruct.new :name => "Joe", :id => 10, :email_address => "joe@example.com"
       end
     end
 
