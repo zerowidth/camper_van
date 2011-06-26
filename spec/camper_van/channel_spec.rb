@@ -271,6 +271,19 @@ describe CamperVan::Channel do
     end
 
     # it "sends a notice with the message when the system sends a message"
+
+    it "marks the user as away when a user goes idle" do
+      @channel.map_message_to_irc msg("Enter")
+      @channel.map_message_to_irc msg("Idle")
+      @channel.users[10].idle?.must_equal true
+    end
+
+    it "marks the user as back when a user becomes active" do
+      @channel.map_message_to_irc msg("Enter")
+      @channel.map_message_to_irc msg("Idle")
+      @channel.map_message_to_irc msg("Unidle")
+      @channel.users[10].idle?.must_equal false
+    end
   end
 end
 

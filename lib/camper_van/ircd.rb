@@ -204,6 +204,8 @@ module CamperVan
         else
           channel.current_topic
         end
+      else
+        # TODO topic error
       end
     end
 

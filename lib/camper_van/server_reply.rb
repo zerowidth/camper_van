@@ -68,6 +68,7 @@ module CamperVan
     end
 
     def campfire_reply(command, username, *args)
+      # TODO instead of @campfire, use user's email address
       send_line ":#{username}!#{username}@campfire #{command.to_s.upcase}" << reply_args(args)
     end
 

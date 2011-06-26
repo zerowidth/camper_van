@@ -213,6 +213,8 @@ module CamperVan
     # Map a campfire message to one or more IRC commands for the client
     #
     # message - the campfire message to map to IRC
+    #
+    # FIXME refactor the message user retrieval to cut down on API calls
     def map_message_to_irc(message)
       # strip Message off the type to simplify readability
       case message.type.sub(/Message$/,'')
@@ -244,17 +246,19 @@ module CamperVan
           client.campfire_reply :mode, name, channel, "-s"
         end
 
-      # when "Idle"
-        # message.user do |user|
-        #   name = irc_name(user.name)
-        #   # set status of user in list to "idle"
-        # end
+      when "Idle"
+        message.user do |user|
+          if u = users[user.id]
+            u.idle = true
+          end
+        end
 
-      # when "Unidle"
-        # message.user do |user|
-        #   name = irc_name(user.name)
-        #   # set status of user in list to "idle"
-        # end
+      when "Unidle"
+        message.user do |user|
+          if u = users[user.id]
+            u.idle = false
+          end
+        end
 
       when "Enter"
         message.user do |user|
