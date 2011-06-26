@@ -260,14 +260,14 @@ module CamperVan
         message.user do |user|
           name = irc_name(user.name)
           client.campfire_reply :join, name, channel
+          users[user.id] = User.new(user)
         end
-        # TODO add to tracking list
 
       when "Leave", "Kick" # kick is used for idle timeouts
         message.user do |user|
           name = irc_name(user.name)
           client.campfire_reply :part, name, channel, "Leaving..."
-          # TODO remove from active user list
+          users.delete user.id
         end
 
       when "Paste"
@@ -293,7 +293,6 @@ module CamperVan
 
       when "Text"
         message.user do |user|
-          # TODO keep registry of user_id / user lookups
           name = irc_name(user.name)
           if name == client.nick
             puts "* skipping message from myself: #{message.type} #{message.inspect}"

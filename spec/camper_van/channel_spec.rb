@@ -235,9 +235,21 @@ describe CamperVan::Channel do
       @client.sent.last.must_match %r/:joe\S+ JOIN #test/
     end
 
+    it "adds the user to the internal tracking list when a user joins" do
+      @channel.map_message_to_irc msg("Enter")
+      @client.sent.last.must_match %r/:joe\S+ JOIN #test/
+      @channel.users[10].wont_equal nil
+    end
+
     it "sends a part command when a user leaves the room" do
       @channel.map_message_to_irc msg("Leave")
       @client.sent.last.must_match %r/:joe\S+ PART #test/
+    end
+
+    it "removes the user from the tracking list when they depart" do
+      @channel.map_message_to_irc msg("Enter")
+      @channel.map_message_to_irc msg("Leave")
+      @channel.users.size.must_equal 0
     end
 
     it "sends a part command when a user is kicked from the room" do
