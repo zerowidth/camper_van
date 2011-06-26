@@ -47,7 +47,7 @@ describe CamperVan::Channel do
       yield
     end
     def users
-      yield @users if @users
+      yield @users
     end
 
     def text(line)
@@ -61,8 +61,6 @@ describe CamperVan::Channel do
       return @stream
     end
   end
-
-  User = Struct.new(:name)
 
   before :each do
     @client = TestClient.new
@@ -83,7 +81,11 @@ describe CamperVan::Channel do
     end
 
     it "sends the list of users" do
-      @room.users = [User.new("nathan"), User.new("bob"), User.new("joe")]
+      @room.users = [
+        OpenStruct.new(:id => 10, :name => "Nathan", :email_address => "x@y.com"),
+        OpenStruct.new(:id => 11, :name => "Bob", :email_address => "x@y.com"),
+        OpenStruct.new(:id => 12, :name => "Joe", :email_address => "x@y.com")
+      ]
       @channel.join
       @client.sent[2].must_equal ":camper_van 353 nathan = #test :nathan bob joe"
       @client.sent[3].must_equal ":camper_van 366 nathan #test :End of /NAMES list."
@@ -108,7 +110,7 @@ describe CamperVan::Channel do
 
   describe "#list_users" do
     it "retrieves a list of users and sends them to the client" do
-      @room.users = [OpenStruct.new(:name => "Joe", :email_address => "user@example.com")]
+      @room.users = [OpenStruct.new(:id => 10, :name => "Joe", :email_address => "user@example.com")]
       @channel.list_users
       @client.sent.first.must_equal(
         ":camper_van 352 nathan #test user example.com camper_van joe H :0 Joe"

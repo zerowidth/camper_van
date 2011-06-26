@@ -1,6 +1,23 @@
 module CamperVan
   class Channel
-    attr_reader :channel, :client, :room, :stream
+
+    # The irc channel name this channel instance is for
+    attr_reader :channel
+
+    # The connected irc client connection
+    attr_reader :client
+
+    # The campfire room to which this channel is connected
+    attr_reader :room
+
+    # Accessor for the EM http request representing the live stream from
+    # the campfire api
+    attr_reader :stream
+
+    # Accessor for hash of known users in the room/channel
+    # Kept up to date by update_users command, as well as Join/Leave
+    # campfire events.
+    attr_reader :users
 
     include Utils
 
@@ -11,6 +28,7 @@ module CamperVan
     # room    - the campfire room we're joining
     def initialize(channel, client, room)
       @channel, @client, @room = channel, client, room
+      @users = {}
     end
 
     # Public: Joins a campfire room and sends the necessary topic
@@ -22,30 +40,29 @@ module CamperVan
       if room.locked?
         numeric_reply :err_inviteonlychan, "Cannot join #{channel} (locked)"
         return false
+
       elsif room.full?
         numeric_reply :err_channelisfull, "Cannot join #{channel} (full)"
         return false
+
       else
+        update_users do
+          # join channel
+          client.user_reply :join, ":#{channel}"
 
-        # good to go, join the room and get the list of users
-        room.join do
-          room.users do |users|
-            # update_user_list users
-            # join channel
-            client.user_reply :join, ":#{channel}"
-            client.numeric_reply :rpl_topic, channel, ':' + room.topic
-            # will include myself, now that i've joined explicitly
-            users.each_slice(10) do |list|
-              names = list.map { |u| irc_name(u.name) }.join(" ")
-              client.numeric_reply :rpl_namereply, "=", channel, ":#{names}"
-            end
-            client.numeric_reply :rpl_endofnames, channel, "End of /NAMES list."
+          # current topic
+          client.numeric_reply :rpl_topic, channel, ':' + room.topic
 
-            # begin streaming the channel
-            stream_campfire_to_channel
+          # List the current users, which will include myself
+          users.values.each_slice(10) do |list|
+            nicks = list.map { |u| u.nick }.join(" ")
+            client.numeric_reply :rpl_namereply, "=", channel, ":#{nicks}"
           end
-        end
+          client.numeric_reply :rpl_endofnames, channel, "End of /NAMES list."
 
+          # begin streaming the channel events (joins room implicitly)
+          stream_campfire_to_channel
+        end
       end
 
       true
@@ -61,7 +78,7 @@ module CamperVan
     def part
       client.user_reply :part, channel
       stream.close_connection if stream
-      # room.leave # let the timeout do it
+      # room.leave # let the timeout do it rather than being explicit
     end
 
     # Public: replies to a WHO command with a list of users for a campfire room,
@@ -69,15 +86,11 @@ module CamperVan
     #
     # For WHO response: http://www.mircscripts.org/forums.php?cid=3&id=159227
     # In short, H = here, G = away
-    #
-    # TODO: handle away / maintain list state / etc.
     def list_users
-      room.users do |users|
-        users.each do |user|
-          account, server = user.email_address.split("@")
-          nick = irc_name(user.name)
-          client.numeric_reply :rpl_whoreply, channel, account, server,
-            "camper_van", nick, "H", ":0 #{user.name}"
+      update_users do
+        users.values.each do |user|
+          client.numeric_reply :rpl_whoreply, channel, user.account, user.server,
+            "camper_van", user.nick, user.idle? ? "G" : "H", ":0 #{user.name}"
         end
         client.numeric_reply :rpl_endofwho, channel, "End of WHO list"
       end
@@ -88,7 +101,7 @@ module CamperVan
     #
     # msg - the IRC PRIVMSG message contents
     #
-    # TODO: substitute "nick: " with the nick's campfire name
+    # TODO: substitute "nick: " with the nick's campfire name instead
     def privmsg(msg)
 
       # convert ACTIONs
@@ -140,6 +153,42 @@ module CamperVan
       room.update("topic" => topic) do
         room.topic = topic
         client.numeric_reply :rpl_topic, channel, ':' + room.topic
+      end
+    end
+
+    # Get the list of users from a room, and update the internal
+    # tracking state as well as the connected client. If the user list
+    # is out of sync, the irc client will receive the associated
+    # JOIN/PART commands.
+    #
+    # callback - optional callback after the users have been updated
+    def update_users(&callback)
+      room.users do |user_list|
+        before = users.dup
+        present = {}
+
+        user_list.each do |user|
+          if before[user.id]
+            present[user.id] = before.delete user.id
+            # if present[user.id].nick != nick
+            #   # NICK CHANGE
+            #   present[user.id].nick = nick
+            # end
+          else
+            present[user.id] = User.new(user)
+            # JOIN
+          end
+
+          # Now that the list of users is updated, the remaining users
+          # in 'before' have left. Let the irc client know.
+          before.each do |id, user|
+            # PART remaining users
+          end
+        end
+
+        @users = present
+
+        callback.call if callback
       end
     end
 

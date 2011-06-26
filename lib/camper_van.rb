@@ -10,6 +10,7 @@ module CamperVan
   require "camper_van/command_parser"     # irc command parser
   require "camper_van/command_definition" # command definition and processing
   require "camper_van/server_reply"       # ircd responses and helpers
+  require "camper_van/user"               # channel/campfire user
 
   require "camper_van/ircd"               # ircd server
   require "camper_van/channel"            # campfire room <-> channel bridge
