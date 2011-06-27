@@ -1,3 +1,5 @@
+# encoding: utf-8
+
 module CamperVan
   class Channel
 
@@ -289,8 +291,24 @@ module CamperVan
           end
         end
 
-      # when "Sound"
-      #   # skip, or /ACTION *sound*
+      when "Sound"
+        message.user do |user|
+          name = irc_name(user.name)
+          text = case message.body
+          when "crickets"
+            "hears crickets chirping"
+          when "rimshot"
+            "plays a rimshot"
+          when "trombone"
+            "plays a sad trombone"
+          when "vuvuzela"
+            "======<() ~ ♪ ~♫"
+          else
+            "played a #{message.body} sound"
+          end
+
+          client.campfire_reply :privmsg, name, channel, "\x01ACTION #{text}\x01"
+        end
 
       # when "System"
       #   # NOTICE from :camper_van to channel?

@@ -208,6 +208,31 @@ describe CamperVan::Channel do
       @client.sent.last.must_match /PRIVMSG #test :\x01ACTION did a thing\x01/
     end
 
+    it "sends an action when a user plays the crickets sound" do
+      @channel.map_message_to_irc msg("Sound", :body => "crickets")
+      @client.sent.last.must_match /\x01ACTION hears crickets chirping\x01/
+    end
+
+    it "sends an action when a user plays the rimshot sound" do
+      @channel.map_message_to_irc msg("Sound", :body => "rimshot")
+      @client.sent.last.must_match /\x01ACTION plays a rimshot\x01/
+    end
+
+    it "sends an action when a user plays the trombone sound" do
+      @channel.map_message_to_irc msg("Sound", :body => "trombone")
+      @client.sent.last.must_match /\x01ACTION plays a sad trombone\x01/
+    end
+
+    it "sends an action when a user plays the vuvuzela sound" do
+      @channel.map_message_to_irc msg("Sound", :body => "vuvuzela")
+      @client.sent.last.must_match /ACTION ======<\(\)/
+    end
+
+    it "sends an action when a user plays an unknown sound" do
+      @channel.map_message_to_irc msg("Sound", :body => "boing")
+      @client.sent.last.must_match /\x01ACTION played a boing sound\x01/
+    end
+
     # it "sends a privmsg with an action when a user plays a sound"
 
     it "sends a mode change when the room is locked" do
