@@ -259,10 +259,9 @@ describe CamperVan::Channel do
 
     # it "sends the tweet url when a user pastes a tweet"
 
-    # TODO not sure if this is correct, needs real-world testing
     it "sends a topic command when a user changes the topic" do
-      @channel.map_message_to_irc msg("Topic", :body => "new topic")
-      @client.sent.last.must_match ":camper_van 332 nathan #test :new topic"
+      @channel.map_message_to_irc msg("TopicChange", :body => "new topic")
+      @client.sent.last.must_match ":joe!joe@campfire TOPIC #test :new topic"
     end
 
     it "sends a message containing the upload link when a user uploads a file" do

@@ -309,9 +309,13 @@ module CamperVan
           end
         end
 
-      when "Topic"
-        client.numeric_reply :rpl_topic, channel, ':' + message.body
-        room.topic = message.body
+      when "TopicChange"
+        message.user do |user|
+          name = irc_name(user.name)
+          client.campfire_reply :topic, name, channel, message.body
+          room.topic = message.body
+        end
+        # client.numeric_reply :rpl_topic, channel, ':' + message.body
 
       when "Upload"
         message.user do |user|
