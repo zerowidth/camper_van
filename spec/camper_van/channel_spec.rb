@@ -56,6 +56,10 @@ describe CamperVan::Channel do
       @sent << line
     end
 
+    def tweet(line)
+      @sent << [:tweet, line]
+    end
+
     def stream
       if @messages
         @messages.each { |m| yield m }
@@ -169,6 +173,12 @@ describe CamperVan::Channel do
     it "converts ACTION messages to campfire-appropriate messages" do
       @channel.privmsg "\01ACTION runs away\01"
       @room.sent.first.must_equal "*runs away*"
+    end
+
+    it "converts twitter urls to tweet messages" do
+      url = "https://twitter.com/aniero/status/12345"
+      @channel.privmsg url
+      @room.sent.first.must_equal [:tweet, url]
     end
   end
 
@@ -299,8 +309,6 @@ describe CamperVan::Channel do
       @client.sent.last.must_match /\x01ACTION played a boing sound\x01/
     end
 
-    # it "sends a privmsg with an action when a user plays a sound"
-
     it "sends a mode change when the room is locked" do
       @channel.map_message_to_irc msg("Lock")
       @client.sent.last.must_match %r/:joe\S+ MODE #test \+i/
@@ -348,8 +356,6 @@ describe CamperVan::Channel do
       @client.sent.last.must_match %r/:joe\S+ PART #test/
     end
 
-    # it "sends the tweet url when a user pastes a tweet"
-
     it "sends a topic command when a user changes the topic" do
       @channel.map_message_to_irc msg("TopicChange", :body => "new topic")
       @client.sent.last.must_match ":joe!joe@campfire TOPIC #test :new topic"
@@ -358,6 +364,28 @@ describe CamperVan::Channel do
     it "sends a message containing the upload link when a user uploads a file" do
       @channel.map_message_to_irc msg("Upload", :body => "filename")
       @client.sent.last.must_match %r(:joe\S+ PRIVMSG #test .*uploads/1234/filename)
+    end
+
+    it "sends a message containing the tweet url when a user posts a tweet" do
+      body = {
+        "id" => 12345,
+        "author_username" => "aniero",
+        "message" => "hello, twitter",
+        "author_avatar_url" => "http://example.com/url.img"
+      }
+      @channel.map_message_to_irc msg("Tweet", :body => body.to_yaml)
+      @client.sent.last.must_match %r(:joe\S+ PRIVMSG #test .*twitter.com/aniero/status/12345.*)
+    end
+
+    it "sends a message containing the tweet url when a user posts a tweet with symbols" do
+      body = {
+        :id => 12345,
+        :author_username => "aniero",
+        :message => "hello, twitter",
+        :author_avatar_url => "http://example.com/url.img"
+      }
+      @channel.map_message_to_irc msg("Tweet", :body => body.to_yaml)
+      @client.sent.last.must_match %r(:joe\S+ PRIVMSG #test .*twitter.com/aniero/status/12345.*)
     end
 
     # it "sends a notice with the message when the system sends a message"

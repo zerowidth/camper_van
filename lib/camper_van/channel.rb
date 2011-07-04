@@ -1,5 +1,7 @@
 # encoding: utf-8
 
+require "yaml"
+
 module CamperVan
   class Channel
 
@@ -113,7 +115,13 @@ module CamperVan
       # convert ACTIONs
       msg.sub! /^\01ACTION (.*)\01$/, '*\1*'
 
-      room.text(msg) { } # async, no-op callback
+      # convert twitter urls to tweets
+      if msg =~ %r(^https://twitter.com/(\w+)/status/(\d+)$)
+        room.tweet(msg) { } # async, no-op callback
+      else
+        room.text(msg) { } # async, no-op callback
+      end
+
     end
 
     # Public: sends the current channel mode to the client
@@ -242,7 +250,7 @@ module CamperVan
       user_for_message(message) do |message, user|
 
         # needed in most cases
-        name = irc_name(user.name)
+        name = user ? irc_name(user.name) : nil
 
         # strip Message off the type to simplify readability
         case message.type.sub(/Message$/,'')
@@ -332,6 +340,14 @@ module CamperVan
         when "Upload"
           client.campfire_reply :privmsg, name, channel, ":\01ACTION uploaded " +
             "https://#{client.subdomain}.campfirenow.com/room/#{room.id}/uploads/#{message.id}/#{message.body}"
+
+        when "Tweet"
+          # stringify keys since campfire API is inconsistent about it
+          tweet = stringify_keys(YAML.load(message.body))
+          client.campfire_reply :privmsg, name, channel,
+            "@#{tweet["author_username"]}: #{tweet["message"]}" +
+            " (https://twitter.com/#{tweet["author_username"]}" +
+            "/status/#{tweet["id"]})"
 
         else
           puts "* unknown message #{message.type}: #{message.inspect}"
