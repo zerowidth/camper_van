@@ -73,6 +73,10 @@ module CamperVan
       send_line ":#{username}!#{username}@campfire #{command.to_s.upcase}" << reply_args(args)
     end
 
+    def error_reply(reason)
+      send_line "ERROR :#{reason}"
+    end
+
     private
 
     def reply_args(args)

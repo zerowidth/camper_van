@@ -74,6 +74,31 @@ describe CamperVan::IRCD do
       line.must_match /NICK nathan/
     end
 
+    it "returns an error and shuts down if campfire can't be contacted" do
+      @server.campfire = Class.new do
+        def user(*args)
+          raise Firering::Connection::HTTPError,
+            OpenStruct.new(:error => "could not connect")
+        end
+      end.new
+      @server.handle :pass => ["test:1234asdf"]
+      @server.handle :nick => ["bob"]
+      @server.handle :user => ["nathan", 0, 0, "Nathan"]
+      @connection.sent.last.must_match /NOTICE .*could not connect/
+    end
+
+    it "returns an error if the campfire api key is incorrect (user info is nil)" do
+      @server.campfire = Class.new do
+        def user(*args)
+          yield OpenStruct.new # nil everything
+        end
+      end.new
+      @server.handle :pass => ["test:1234asdf"]
+      @server.handle :nick => ["bob"]
+      @server.handle :user => ["nathan", 0, 0, "Nathan"]
+      @connection.sent.last.must_match /NOTICE .*invalid api key/i
+    end
+
     context "when registered" do
       before :each do
         @server.handle :pass => ["test:1234asdf"]

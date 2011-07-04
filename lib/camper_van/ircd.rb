@@ -260,10 +260,17 @@ module CamperVan
     # If it fails, it replies with an error to the client and
     # disconnects.
     def check_campfire_authentication(&callback)
-      campfire.user("me") do
-        yield
+      # invalid user only returns a nil result!
+      campfire.user("me") do |user|
+        if user.name
+          yield
+        else
+          command_reply :notice, "AUTH", "could not connect to campfire: invalid API key"
+          shutdown
+        end
       end
     rescue Firering::Connection::HTTPError => e
+      command_reply :notice, "AUTH", "could not connect to campfire: #{e.message}"
       shutdown
     end
 
