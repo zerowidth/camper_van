@@ -1,20 +1,60 @@
 #!/usr/bin/env ruby
 
 require "camper_van"
+require "trollop"
 
 def usage
   STDERR.puts "camper_van proxy <server> [port]"
   exit 1
 end
 
-case ARGV.first
-when nil
-  CamperVan::Server.run
-when "proxy"
-  usage if ARGV.size == 1
+parser = Trollop::Parser.new do
+  version "camper_van version #{CamperVan::VERSION}"
+  banner <<-banner
+camper_van is a campfire to irc bridge.
+
+Usage:
+
+  camper_van <bind address> [bind port] [options]
+
+  bind address defaults to 127.0.0.1
+  bind port defaults to 6667
+
+For irc debugging, use the debugging proxy:
+
+  camper_van proxy <server> [port]
+
+  banner
+
+  stop_on "proxy"
+
+  opt :log_level, "Log level", :default => "info"
+  opt :log_file, "Log file", :short => "f", :type => :string
+end
+
+opts = Trollop.with_standard_exception_handling parser do
+  o = parser.parse ARGV
+
+  if (ARGV.first == "proxy" && ARGV.size == 1)
+    raise Trollop::HelpNeeded
+  end
+
+  o
+end
+
+if ARGV.first == "proxy"
   if ARGV[2]
     CamperVan::DebugProxy.run(ARGV[1], ARGV[2].to_i)
   else
     CamperVan::DebugProxy.run(ARGV[1])
   end
+else
+
+  CamperVan::Server.run(
+    ARGV[0] || "127.0.0.1",
+    ARGV[1] || 6667,
+    :log_level => opts[:log_level].to_sym,
+    :log_to => opts[:log_file]
+  )
+
 end
