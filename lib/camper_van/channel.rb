@@ -77,7 +77,8 @@ module CamperVan
 
     # Public: "leaves" a campfire room, per the PART irc command.
     # Confirms with the connected client to PART the channel.
-    # Does not actually leave the room, just closes out the campfire
+    #
+    # Does not actually leave the campfire room, just closes out the campfire
     # connections, so the server can idle the connection out. This behavior
     # was chosen so periodic joins/parts wouldn't spam the campfire rooms
     # unnecessarily, and also to reflect how Propane et. al. treat open
@@ -85,7 +86,7 @@ module CamperVan
     def part
       client.user_reply :part, channel
       stream.close_connection if stream
-      # room.leave # let the timeout do it rather than being explicit
+      # room.leave # let the timeout do it rather than being explicit!
     end
 
     # Public: replies to a WHO command with a list of users for a campfire room,

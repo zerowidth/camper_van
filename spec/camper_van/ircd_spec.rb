@@ -179,6 +179,29 @@ describe CamperVan::IRCD do
       end
     end
 
+    context "with a QUIT command" do
+      before :each do
+        @channel = MiniTest::Mock.new
+
+        # register
+        @server.handle :pass => ["test:1234asdf"]
+        @server.handle :nick => ["nathan"]
+        @server.handle :user => ["nathan", 0, 0, "Nathan"]
+
+        @server.channels["#test"] = @channel
+      end
+
+      after :each do
+        @channel.verify
+      end
+
+      it "calls #part on the connected channels" do
+        @channel.expect(:part, nil)
+        @server.handle :quit => ["leaving..."]
+      end
+
+    end
+
   end
 
 end

@@ -241,6 +241,13 @@ module CamperVan
       # ignore silently, there's no campfire API for this
     end
 
+    handle :quit do |args|
+      channels.values.each do |channel|
+        channel.part
+      end
+      shutdown
+    end
+
     # Completes a successful registration with the appropriate responses
     def successful_registration
       check_campfire_authentication do
