@@ -189,6 +189,57 @@ describe CamperVan::Channel do
     end
   end
 
+  describe "#set_mode" do
+    before :each do
+      @room = OpenStruct.new :membership_limit => 10
+      class << @room
+        def locked?
+          self.locked
+        end
+        def lock
+          self.lock_called = true
+        end
+        def unlock
+          self.unlock_called = true
+        end
+      end
+      @channel = CamperVan::Channel.new("#test", @client, @room)
+    end
+
+    context "with a +i" do
+      it "locks the room" do
+        @channel.set_mode "+i"
+        @room.lock_called.must_equal true
+        @room.locked.must_equal true
+      end
+
+      it "tells the client that the channel mode has changed" do
+        @channel.set_mode "+i"
+        @client.sent.last.must_match /MODE #test \+ils 10/
+      end
+    end
+
+    context "with a -i" do
+      it "unlocks the room" do
+        @channel.set_mode "-i"
+        @room.unlock_called.must_equal true
+        @room.locked.must_equal false
+      end
+
+      it "tells the client the channel mode has changed" do
+        @channel.set_mode "-i"
+        @client.sent.last.must_match /MODE #test \+ls 10/
+      end
+    end
+
+    context "with an unknown mode" do
+      it "replies with an irc error" do
+        @channel.set_mode "+m"
+        @client.sent.last.must_match /472 nathan :.*unknown mode/
+      end
+    end
+  end
+
   describe "when streaming" do
     class TestMessage < OpenStruct
       def user

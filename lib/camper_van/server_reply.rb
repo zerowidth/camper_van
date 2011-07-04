@@ -48,6 +48,7 @@ module CamperVan
       :err_passwdmismatch     => "464",
 
       :err_channelisfull      => "471", # room is full
+      :err_unknownmode        => "472",
       :err_inviteonlychan     => "473", # couldn't join the room, it's locked
       :err_unavailresource    => "437" # no such room!
 

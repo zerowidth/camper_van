@@ -219,8 +219,19 @@ module CamperVan
     end
 
     handle :mode do |args|
-      if channel = channels[args.first]
-        channel.current_mode
+      if channel = channels[args.shift]
+
+        if mode = args.first
+          if mode =~ /^[+-][si]$/
+            channel.set_mode mode
+          else
+            mode = mode.gsub(/\W/,'')
+            numeric_reply :err_unknownmode, mode, "Unknown mode #{mode}"
+          end
+        else
+          channel.current_mode
+        end
+
       else
         # no error message for this situation, so ignore it silently
       end

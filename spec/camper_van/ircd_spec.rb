@@ -108,6 +108,23 @@ describe CamperVan::IRCD do
         @server.handle :mode => ["#test"]
       end
 
+      it "with a +i sets the channel mode to +i" do
+        @channel.expect :set_mode, nil, ["+i"]
+        @server.handle :mode => ["#test", "+i"]
+      end
+
+      it "with a -i sets the channel mode to -i" do
+        @channel.expect :set_mode, nil, ["-i"]
+        @server.handle :mode => ["#test", "-i"]
+      end
+
+      context "with an unknown mode argument" do
+        it "responds with an error" do
+          @server.handle :mode => ["#test", "-t"]
+          @connection.sent.last.must_match /472 nathan t :Unknown mode t/
+        end
+      end
+
     end
 
     context "with a WHO command" do

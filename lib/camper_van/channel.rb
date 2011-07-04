@@ -118,31 +118,48 @@ module CamperVan
     # Public: sends the current channel mode to the client
     def current_mode
       n = room.membership_limit
-      s = room.open_to_guests? ? "" : "s"
-      i = room.locked? ? "i" : ""
-      client.numeric_reply :rpl_channelmodeis, channel, "+#{i}l#{s}", n
+      client.numeric_reply :rpl_channelmodeis, channel, current_mode_string, n
     end
 
     # Public: set the mode on the campfire channel, mapping from the provided
     # IRC chanmode to the campfire setting.
     #
     # mode - the IRC mode flag change. Must be one of:
-    #        "+s" - disable guest access
-    #        "-s" - enable guest access
     #        "+i" - lock room
     #        "-i" - unlock room
+    #
+    # TODO support these when the firering client does:
+    #        "+s" - disable guest access
+    #        "-s" - enable guest access
     #
     # Returns nothing, but lets the client know the results of the call. Sends
     #   an error to the client for an invalid mode string.
     def set_mode(mode)
       case mode
-      when "+s"
-      when "-s"
+      # when "+s"
+      # when "-s"
       when "+i"
+        room.lock
+        room.locked = true
+        client.user_reply :mode, channel,
+          current_mode_string, room.membership_limit
       when "-i"
+        room.unlock
+        room.locked = false
+        client.user_reply :mode, channel,
+          current_mode_string, room.membership_limit
       else
-        client.numeric_reply
+        client.numeric_reply :err_unknownmode,
+          "is unknown mode char to me for #{channel}"
       end
+    end
+
+    # Returns the current mode string
+    def current_mode_string
+      n = room.membership_limit
+      s = room.open_to_guests? ? "" : "s"
+      i = room.locked? ? "i" : ""
+      "+#{i}l#{s}"
     end
 
     # Public: returns the current topic of the campfire room
