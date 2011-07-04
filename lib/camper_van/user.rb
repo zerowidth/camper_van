@@ -32,6 +32,16 @@ module CamperVan
     # is_idle - true/false
     attr_writer :idle
 
+    # Public: whether or not the user is an admin
+    def admin?
+      @admin
+    end
+
+    # Public: set the user's admin state
+    #
+    # admin - true/false
+    attr_writer :admin
+
     # Public: create a new user from a campfire user definition.
     #
     # Initializes the user's fields based on the campfire user info.
@@ -41,6 +51,7 @@ module CamperVan
       @account, @server = user.email_address.split("@")
       @nick = irc_name user.name
       @idle = false
+      @admin = user.admin
     end
 
   end

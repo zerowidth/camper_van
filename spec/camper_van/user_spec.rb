@@ -32,5 +32,9 @@ describe CamperVan::User do
       @user.id.must_equal 12345
     end
 
+    it "can be an admin" do
+      @user.admin?.must_equal true
+    end
+
   end
 end

@@ -90,12 +90,13 @@ module CamperVan
     # including their nicks, names, and status.
     #
     # For WHO response: http://www.mircscripts.org/forums.php?cid=3&id=159227
-    # In short, H = here, G = away
+    # In short, H = here, G = away, append @ for chanops (admins)
     def list_users
       update_users(:include_joins_and_parts) do
         users.values.each do |user|
+          status = (user.idle? ? "G" : "H") + (user.admin? ? "@" : "")
           client.numeric_reply :rpl_whoreply, channel, user.account, user.server,
-            "camper_van", user.nick, user.idle? ? "G" : "H", ":0 #{user.name}"
+            "camper_van", user.nick, status, ":0 #{user.name}"
         end
         client.numeric_reply :rpl_endofwho, channel, "End of WHO list"
       end

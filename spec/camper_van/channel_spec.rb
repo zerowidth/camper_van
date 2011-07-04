@@ -152,6 +152,12 @@ describe CamperVan::Channel do
       @channel.list_users
       @client.sent.first.must_match /joe G :0 Joe/
     end
+
+    it "shows admin users as having +o" do
+      @channel.users[10].admin = true
+      @channel.list_users
+      @client.sent.first.must_match /joe H@ :0 Joe/
+    end
   end
 
   describe "#privmsg" do
