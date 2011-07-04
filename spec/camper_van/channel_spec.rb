@@ -92,6 +92,15 @@ describe CamperVan::Channel do
       @client.sent[2].must_equal ":camper_van 353 nathan = #test :nathan bob joe"
       @client.sent[3].must_equal ":camper_van 366 nathan #test :End of /NAMES list."
     end
+
+    it "sends the list of users including myself, even if the server doesn't say i'm there" do
+      @room.users = [
+        OpenStruct.new(:id => 11, :name => "Bob", :email_address => "x@y.com"),
+        OpenStruct.new(:id => 12, :name => "Joe", :email_address => "x@y.com")
+      ]
+      @channel.join
+      @client.sent[2].must_equal ":camper_van 353 nathan = #test :nathan bob joe"
+    end
   end
 
   describe "#part" do

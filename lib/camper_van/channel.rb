@@ -55,10 +55,13 @@ module CamperVan
           # current topic
           client.numeric_reply :rpl_topic, channel, ':' + room.topic
 
-          # List the current users, which will include myself
-          users.values.each_slice(10) do |list|
-            nicks = list.map { |u| u.nick }.join(" ")
-            client.numeric_reply :rpl_namereply, "=", channel, ":#{nicks}"
+          # List the current users, which must always include myself
+          # (race condition, server may not realize the user has joined yet)
+          nicks = users.values.map { |u| u.nick }
+          nicks.unshift client.nick unless nicks.include? client.nick
+
+          nicks.each_slice(10) do |list|
+            client.numeric_reply :rpl_namereply, "=", channel, ":#{list.join ' '}"
           end
           client.numeric_reply :rpl_endofnames, channel, "End of /NAMES list."
 
