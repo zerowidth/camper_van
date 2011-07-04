@@ -112,13 +112,17 @@ module CamperVan
     # TODO: substitute "nick: " with the nick's campfire name instead
     def privmsg(msg)
 
-      # convert ACTIONs
-      msg.sub! /^\01ACTION (.*)\01$/, '*\1*'
-
       # convert twitter urls to tweets
       if msg =~ %r(^https://twitter.com/(\w+)/status/(\d+)$)
         room.tweet(msg) { } # async, no-op callback
       else
+        # convert ACTIONs
+        msg.sub! /^\01ACTION (.*)\01$/, '*\1*'
+
+        if matched = users.values.detect {|u| msg.start_with?(u.nick + ': ')}
+          msg = msg.sub(/^#{matched.nick}/, matched.name)
+        end
+
         room.text(msg) { } # async, no-op callback
       end
 
@@ -331,11 +335,13 @@ module CamperVan
           if message.body =~ /^\*.*\*$/
             client.campfire_reply :privmsg, name, channel, ":\01ACTION " + message.body[1..-2] + "\01"
           else
-            if message.body =~ /^\*.*\*$/
-              client.campfire_reply :privmsg, name, channel, ":\01ACTION " + message.body[1..-2] + "\01"
+            matched = users.values.detect {|u| message.body.start_with?(u.name + ': ')}
+            if matched
+              body = message.body.sub(/^#{matched.name}/, matched.nick)
             else
-              client.campfire_reply :privmsg, name, channel, message.body
+              body = message.body
             end
+            client.campfire_reply :privmsg, name, channel, body
           end
 
         when "TopicChange"

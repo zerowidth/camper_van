@@ -180,6 +180,18 @@ describe CamperVan::Channel do
       @channel.privmsg url
       @room.sent.first.must_equal [:tweet, url]
     end
+
+    it "converts leading nicknames into campfire names" do
+      # get the users into the room
+      @room.users = [
+        OpenStruct.new(:id => 11, :name => "Bob Fred", :email_address => "x@y.com"),
+        OpenStruct.new(:id => 12, :name => "Joe", :email_address => "x@y.com")
+      ]
+      @channel.list_users
+
+      @channel.privmsg "bob_fred: sup dude"
+      @room.sent.last.must_match /Bob Fred: sup dude/
+    end
   end
 
   describe "#current_mode" do
@@ -282,6 +294,20 @@ describe CamperVan::Channel do
     it "sends a privmsg with an action when a user message is wrapped in *'s" do
       @channel.map_message_to_irc msg("Text", :body => "*did a thing*")
       @client.sent.last.must_match /PRIVMSG #test :\x01ACTION did a thing\x01/
+    end
+
+    it "converts leading name matches to irc nicks" do
+      # get the users into the room
+      @room.users = [
+        OpenStruct.new(:id => 11, :name => "Bob Fred", :email_address => "x@y.com"),
+        OpenStruct.new(:id => 12, :name => "Joe", :email_address => "x@y.com")
+      ]
+      @channel.list_users
+      @client.sent.clear
+
+      # now check the mapping
+      @channel.map_message_to_irc msg("Text", :body => "Bob Fred: hello")
+      @client.sent.last.must_match %r(PRIVMSG #test :bob_fred: hello)
     end
 
     it "sends an action when a user plays the crickets sound" do
