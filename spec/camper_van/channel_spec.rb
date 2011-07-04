@@ -246,7 +246,7 @@ describe CamperVan::Channel do
     end
   end
 
-  describe "when streaming" do
+  describe "#map_message_to_irc when streaming" do
     class TestMessage < OpenStruct
       def user
         yield OpenStruct.new :name => "Joe", :id => 10, :email_address => "joe@example.com"

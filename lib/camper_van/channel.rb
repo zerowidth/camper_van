@@ -237,69 +237,52 @@ module CamperVan
     #
     # message - the campfire message to map to IRC
     #
-    # FIXME refactor the message user retrieval to cut down on API calls
+    # Returns nothing, but responds according to the message
     def map_message_to_irc(message)
-      # strip Message off the type to simplify readability
-      case message.type.sub(/Message$/,'')
+      user_for_message(message) do |message, user|
 
-      when "Timestamp", "Advertisement"
-        # ignore these
+        # needed in most cases
+        name = irc_name(user.name)
 
-      when "Lock"
-        message.user do |user|
-          name = irc_name(user.name)
+        # strip Message off the type to simplify readability
+        case message.type.sub(/Message$/,'')
+
+        when "Timestamp", "Advertisement"
+          # ignore these
+
+        when "Lock"
           client.campfire_reply :mode, name, channel, "+i"
-        end
 
-      when "Unlock"
-        message.user do |user|
-          name = irc_name(user.name)
+        when "Unlock"
           client.campfire_reply :mode, name, channel, "-i"
-        end
 
-      when "DisallowGuests"
-        message.user do |user|
+        when "DisallowGuests"
           name = irc_name(user.name)
           client.campfire_reply :mode, name, channel, "+s"
-        end
 
-      when "AllowGuests"
-        message.user do |user|
+        when "AllowGuests"
           name = irc_name(user.name)
           client.campfire_reply :mode, name, channel, "-s"
-        end
 
-      when "Idle"
-        message.user do |user|
+        when "Idle"
           if u = users[user.id]
             u.idle = true
           end
-        end
 
-      when "Unidle"
-        message.user do |user|
+        when "Unidle"
           if u = users[user.id]
             u.idle = false
           end
-        end
 
-      when "Enter"
-        message.user do |user|
-          name = irc_name(user.name)
+        when "Enter"
           client.campfire_reply :join, name, channel
           users[user.id] = User.new(user)
-        end
 
-      when "Leave", "Kick" # kick is used for idle timeouts
-        message.user do |user|
-          name = irc_name(user.name)
+        when "Leave", "Kick" # kick is used for idle timeouts
           client.campfire_reply :part, name, channel, "Leaving..."
           users.delete user.id
-        end
 
-      when "Paste"
-        message.user do |user|
-          name = irc_name(user.name)
+        when "Paste"
           lines = message.body.split("\n")
 
           lines[0..2].each do |line|
@@ -310,11 +293,8 @@ module CamperVan
             client.campfire_reply :privmsg, name, channel, "> more: " +
               "https://#{client.subdomain}.campfirenow.com/room/#{room.id}/paste/#{message.id}"
           end
-        end
 
-      when "Sound"
-        message.user do |user|
-          name = irc_name(user.name)
+        when "Sound"
           text = case message.body
           when "crickets"
             "hears crickets chirping"
@@ -329,14 +309,11 @@ module CamperVan
           end
 
           client.campfire_reply :privmsg, name, channel, "\x01ACTION #{text}\x01"
-        end
 
-      # when "System"
-      #   # NOTICE from :camper_van to channel?
+        # when "System"
+        #   # NOTICE from :camper_van to channel?
 
-      when "Text"
-        message.user do |user|
-          name = irc_name(user.name)
+        when "Text"
           if name == client.nick
             puts "* skipping message from myself: #{message.type} #{message.inspect}"
           else
@@ -346,25 +323,35 @@ module CamperVan
               client.campfire_reply :privmsg, name, channel, message.body
             end
           end
-        end
 
-      when "TopicChange"
-        message.user do |user|
-          name = irc_name(user.name)
+        when "TopicChange"
           client.campfire_reply :topic, name, channel, message.body
           room.topic = message.body
-        end
-        # client.numeric_reply :rpl_topic, channel, ':' + message.body
+          # client.numeric_reply :rpl_topic, channel, ':' + message.body
 
-      when "Upload"
-        message.user do |user|
-          name = irc_name(user.name)
+        when "Upload"
           client.campfire_reply :privmsg, name, channel, ":\01ACTION uploaded " +
             "https://#{client.subdomain}.campfirenow.com/room/#{room.id}/uploads/#{message.id}/#{message.body}"
-        end
 
+        else
+          puts "* unknown message #{message.type}: #{message.inspect}"
+        end
+      end
+    end
+
+    # Retrieve the user from a message, either by finding it in the current
+    # list of known users, or by asking campfire for the user.
+    #
+    # message - the message for which to look up the user
+    #
+    # Yields the message and the user associated with the message
+    def user_for_message(message)
+      if user = users[message.user_id]
+        yield message, user
       else
-        puts "* unknown message #{message.type}: #{message.inspect}"
+        message.user do |user|
+          yield message, user
+        end
       end
     end
 
