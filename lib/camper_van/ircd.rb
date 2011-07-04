@@ -36,6 +36,7 @@ module CamperVan
     include CommandParser     # parses IRC commands
     include ServerReply       # IRC reply helpers
     include Utils             # irc translation helpers
+    include Logger            # logging helper
 
     # Public: initialize an IRC server connection
     #
@@ -55,6 +56,7 @@ module CamperVan
         "http://#{subdomain}.campfirenow.com"
       ) do |c|
         c.token = api_key
+        c.logger = CamperVan.logger
       end
     end
 
@@ -65,7 +67,7 @@ module CamperVan
         handle cmd
       end
     rescue HandlerMissing
-      puts "* ignoring #{cmd.inspect}: no handler"
+      logger.info "ignoring irc command #{cmd.inspect}: no handler"
     end
 
     # Send a line back to the irc client
@@ -77,11 +79,6 @@ module CamperVan
     def shutdown
       @active = false
       client.close_connection
-    end
-
-    # Public: callback for when the connection is closed.
-    def unbind
-      # TODO: leave all channels, close down campfire, etc.
     end
 
     # IRC registration sequence:
@@ -128,7 +125,7 @@ module CamperVan
       else
         @user = args.first
         # grab the remote IP address for the client
-        @host = client.get_peername[4,4].unpack("C4").map { |q| q.to_s }.join(".")
+        @host = client.remote_ip
 
         unless @api_key
           command_reply :notice, "AUTH", "*** must specify campfire API key as password ***"

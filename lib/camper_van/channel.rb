@@ -24,6 +24,7 @@ module CamperVan
     attr_reader :users
 
     include Utils
+    include Logger
 
     # Public: create a new campfire channel
     #
@@ -259,7 +260,7 @@ module CamperVan
 
         if %w(Text Tweet Sound Paste Upload).include?(
           message.type.sub(/Message$/, '')) && name == client.nick
-            puts "* skipping message from myself: #{message.type} #{message.inspect}"
+            logger.debug "skipping message from myself: #{message.type} #{message.body}"
           return
         end
 
@@ -363,7 +364,7 @@ module CamperVan
             "/status/#{tweet["id"]})"
 
         else
-          puts "* unknown message #{message.type}: #{message.inspect}"
+          logger.warn "unknown message #{message.type}: #{message.body}"
         end
       end
     end

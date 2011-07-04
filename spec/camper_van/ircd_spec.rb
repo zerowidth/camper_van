@@ -15,8 +15,8 @@ describe CamperVan::IRCD do
     def close_connection
     end
 
-    def get_peername
-      "xx" + [6667, 127, 0, 0, 1].pack("nC4")
+    def remote_ip
+      "127.0.0.1"
     end
   end
 

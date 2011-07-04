@@ -11,6 +11,7 @@ PATH
     camper_van (0.0.1)
       eventmachine (~> 0.12.10)
       firering (~> 1.1.0)
+      logging (~> 1.5.1)
 
 GEM
   remote: http://rubygems.org/
@@ -29,6 +30,9 @@ GEM
     growl (1.0.3)
     guard (0.4.2)
       thor (~> 0.14.6)
+    little-plugger (1.1.2)
+    logging (1.5.1)
+      little-plugger (>= 1.1.2)
     minitest (2.2.2)
     rb-fsevent (0.4.0)
     thor (0.14.6)
