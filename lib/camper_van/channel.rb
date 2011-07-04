@@ -252,6 +252,12 @@ module CamperVan
         # needed in most cases
         name = user ? irc_name(user.name) : nil
 
+        if %w(Text Tweet Sound Paste Upload).include?(
+          message.type.sub(/Message$/, '')) && name == client.nick
+            puts "* skipping message from myself: #{message.type} #{message.inspect}"
+          return
+        end
+
         # strip Message off the type to simplify readability
         case message.type.sub(/Message$/,'')
 
@@ -322,8 +328,8 @@ module CamperVan
         #   # NOTICE from :camper_van to channel?
 
         when "Text"
-          if name == client.nick
-            puts "* skipping message from myself: #{message.type} #{message.inspect}"
+          if message.body =~ /^\*.*\*$/
+            client.campfire_reply :privmsg, name, channel, ":\01ACTION " + message.body[1..-2] + "\01"
           else
             if message.body =~ /^\*.*\*$/
               client.campfire_reply :privmsg, name, channel, ":\01ACTION " + message.body[1..-2] + "\01"
