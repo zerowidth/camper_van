@@ -121,9 +121,11 @@ module CamperVan
         # convert ACTIONs
         msg.sub! /^\01ACTION (.*)\01$/, '*\1*'
 
-        if matched = users.values.detect {|u| msg.start_with?(u.nick + ': ')}
-          msg = msg.sub(/^#{matched.nick}/, matched.name)
+        matched = users.values.detect do |user|
+          msg =~ /^#{Regexp.escape(user.nick)}($|\W+(\s|$))/
         end
+
+        msg = msg.sub(/^#{matched.nick}/, matched.name) if matched
 
         room.text(msg) { } # async, no-op callback
       end
@@ -337,7 +339,10 @@ module CamperVan
           if message.body =~ /^\*.*\*$/
             client.campfire_reply :privmsg, name, channel, ":\01ACTION " + message.body[1..-2] + "\01"
           else
-            matched = users.values.detect {|u| message.body.start_with?(u.name + ': ')}
+            matched = users.values.detect do |user|
+              message.body =~ /^#{Regexp.escape(user.name)}(\W+(\s|$)|$)/
+            end
+
             if matched
               body = message.body.sub(/^#{matched.name}/, matched.nick)
             else

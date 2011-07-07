@@ -192,6 +192,28 @@ describe CamperVan::Channel do
       @channel.privmsg "bob_fred: sup dude"
       @room.sent.last.must_match /Bob Fred: sup dude/
     end
+
+    it "converts leading nicknames followed by punctuation" do
+      @room.users = [
+        OpenStruct.new(:id => 11, :name => "Bob Fred", :email_address => "x@y.com"),
+        OpenStruct.new(:id => 12, :name => "Joe", :email_address => "x@y.com")
+      ]
+      @channel.list_users
+
+      @channel.privmsg "bob_fred! sup!"
+      @room.sent.last.must_match /Bob Fred! sup/
+    end
+
+    it "converts just leading nicks to names" do
+      @room.users = [
+        OpenStruct.new(:id => 11, :name => "Bob Fred", :email_address => "x@y.com"),
+        OpenStruct.new(:id => 12, :name => "Joe", :email_address => "x@y.com")
+      ]
+      @channel.list_users
+
+      @channel.privmsg "bob_fred"
+      @room.sent.last.must_match /Bob Fred/
+    end
   end
 
   describe "#current_mode" do
@@ -308,6 +330,27 @@ describe CamperVan::Channel do
       # now check the mapping
       @channel.map_message_to_irc msg("Text", :body => "Bob Fred: hello")
       @client.sent.last.must_match %r(PRIVMSG #test :bob_fred: hello)
+    end
+
+    it "converts just leading names to nicks" do
+      @room.users = [
+        OpenStruct.new(:id => 11, :name => "Bob Fred", :email_address => "x@y.com"),
+        OpenStruct.new(:id => 12, :name => "Joe", :email_address => "x@y.com")
+      ]
+      @channel.list_users
+      @channel.map_message_to_irc msg("Text", :body => "Bob Fred")
+      @client.sent.last.must_match %r(PRIVMSG #test bob_fred)
+    end
+
+    it "converts leading names plus punctuation to nicks" do
+      @room.users = [
+        OpenStruct.new(:id => 11, :name => "Bob Fred", :email_address => "x@y.com"),
+        OpenStruct.new(:id => 12, :name => "Joe", :email_address => "x@y.com")
+      ]
+      @channel.list_users
+
+      @channel.map_message_to_irc msg("Text", :body => "Bob Fred!!? dude!")
+      @client.sent.last.must_match %r(PRIVMSG #test :bob_fred!!\? dude)
     end
 
     it "sends an action when a user plays the crickets sound" do
