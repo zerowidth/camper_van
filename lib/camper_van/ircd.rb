@@ -179,6 +179,7 @@ module CamperVan
     end
 
     handle :join do |args|
+      args = args.map { |args| args.split(",")}.flatten
       args.each do |channel|
         join_channel channel
       end

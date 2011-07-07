@@ -106,9 +106,39 @@ describe CamperVan::IRCD do
         @server.handle :user => ["nathan", 0, 0, "Nathan"]
       end
 
-      # it "connects to the campfire API" do
-      #   skip "campfire api next!"
-      # end
+      context "with a JOIN command" do
+        before :each do
+          @server.campfire = Class.new do
+            def rooms
+              yield [
+                OpenStruct.new(:name => "Test"),
+                OpenStruct.new(:name => "Day Job")
+              ]
+            end
+          end.new
+          @connection.sent.clear
+        end
+
+        it "joins the given room" do
+          @server.handle :join => ["#test"]
+          @server.channels["#test"].must_be_instance_of CamperVan::Channel
+        end
+
+        it "returns an error if the room doesn't exist" do
+          @server.handle :join => ["#foo"]
+          @server.channels["#foo"].must_equal nil
+          @connection.sent.last.must_match /no such.*room/i
+        end
+
+        it "joins multiple channels if given" do
+          @server.handle :join => ["#test,#day_job"]
+          @connection.sent.must_be_empty
+          @server.channels["#test"].must_be_instance_of CamperVan::Channel
+          @server.channels["#day_job"].must_be_instance_of CamperVan::Channel
+          @ser
+        end
+      end
+
     end
 
     context "with a MODE command" do
