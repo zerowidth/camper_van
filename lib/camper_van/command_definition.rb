@@ -3,7 +3,7 @@ module CamperVan
     attr_reader :command
     def initialize(command)
       @command = command
-      @message = "no handler for the #{command.keys.first} command"
+      @message = "no handler for the #{command and command.keys.first} command"
     end
   end
 
