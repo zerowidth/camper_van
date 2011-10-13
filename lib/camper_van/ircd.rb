@@ -53,7 +53,7 @@ module CamperVan
     # client using the configured subdomain and API key.
     def campfire
       @campfire ||= Firering::Connection.new(
-        "http://#{subdomain}.campfirenow.com"
+        "https://#{subdomain}.campfirenow.com"
       ) do |c|
         c.token = api_key
         c.logger = CamperVan.logger
