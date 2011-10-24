@@ -1,0 +1,1 @@
+server: ruby -I:lib bin/camper_van 0.0.0.0 $PORT
