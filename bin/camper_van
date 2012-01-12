@@ -30,6 +30,7 @@ For irc debugging, use the debugging proxy:
 
   opt :log_level, "Log level", :default => "info"
   opt :log_file, "Log file", :short => "f", :type => :string
+  opt :ssl, "Enable SSL"
 end
 
 opts = Trollop.with_standard_exception_handling parser do
@@ -54,7 +55,8 @@ else
     ARGV[0] || "127.0.0.1",
     ARGV[1] || 6667,
     :log_level => opts[:log_level].to_sym,
-    :log_to => opts[:log_file]
+    :log_to => opts[:log_file],
+    :ssl => opts[:ssl]
   )
 
 end

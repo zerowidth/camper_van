@@ -9,8 +9,16 @@ describe CamperVan::Server do
     include CamperVan::Server
 
     attr_reader :sent
-    def initialize
+    attr_reader :tls_started
+    def initialize(*)
+      super
+
       @sent = []
+      @tls_started = false
+    end
+
+    def start_tls
+      @tls_started = true
     end
 
     def close_connection
@@ -25,13 +33,27 @@ describe CamperVan::Server do
     end
   end
 
-  before :each do
-    @server = TestServer.new
-    @server.post_init
+  describe "#post_init" do
+    it "starts TLS if the ssl option is true" do
+      @server = TestServer.new(:ssl => true)
+
+      @server.post_init
+      @server.tls_started.must_equal true
+    end
+
+    it "does not start TLS if the ssl option is not true" do
+      @server = TestServer.new
+
+      @server.post_init
+      @server.tls_started.must_equal false
+    end
   end
 
   describe "#receive_line" do
     it "allows for a failed attempt at registration" do
+      @server = TestServer.new
+      @server.post_init
+
       @server.receive_line "PASS invalid"
       @server.receive_line "NICK nathan" # ignored
       @server.receive_line "USER nathan 0 0 :Nathan" # ignored
