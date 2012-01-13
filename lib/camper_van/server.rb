@@ -11,6 +11,9 @@ module CamperVan
     #                :log_level - defaults to 'info'
     #                :log_to - log to filename (string), IO. defaults to STDOUT
     #                :ssl - use ssl for client connections, defaults to false
+    #                :ssl_private_key - if using ssl, private key file to use, defaults to self-signed
+    #                :ssl_cert - if using ssl, cert file to use, defaults to self-signed
+    #                :ssl_verify_peer - if using ssl, verify client certificates, defaults to false
     def self.run(bind_address="localhost", port=6667, options={})
 
       initialize_logging options
