@@ -7,16 +7,21 @@ module CamperVan
     #
     # bind_address - what address to bind to
     # port         - what port to listen on
-    # log_options  - an optional hash of additional configuration
-    #                options for the logger (see .initialize_logging)
-    def self.run(bind_address="localhost", port=6667, log_options={})
+    # options      - an optional hash of additional configuration
+    #                :log_level - defaults to 'info'
+    #                :log_to - log to filename (string), IO. defaults to STDOUT
+    #                :ssl - use ssl for client connections, defaults to false
+    #                :ssl_private_key - if using ssl, private key file to use, defaults to self-signed
+    #                :ssl_cert - if using ssl, cert file to use, defaults to self-signed
+    #                :ssl_verify_peer - if using ssl, verify client certificates, defaults to false
+    def self.run(bind_address="localhost", port=6667, options={})
 
-      initialize_logging log_options
+      initialize_logging options
 
       EM.run do
         logger = Logging.logger[self.name]
         logger.info "starting server on #{bind_address}:#{port}"
-        EM.start_server bind_address, port, self
+        EM.start_server bind_address, port, self, options
         trap("INT") do
           logger.info "SIGINT, shutting down"
           EM.stop
@@ -58,6 +63,13 @@ module CamperVan
     # Public: returns the instance of the ircd for this connection
     attr_reader :ircd
 
+    # Public: returns connection options
+    attr_reader :options
+
+    def initialize(options={})
+      @options = options
+    end
+
     # Public callback once a server connection is established.
     #
     # Initializes an IRCD instance for this connection.
@@ -69,6 +81,11 @@ module CamperVan
 
       # start up the IRCD for this connection
       @ircd = IRCD.new(self)
+
+      if options[:ssl]
+        logger.info "starting TLS for #{remote_ip}"
+        start_tls(:cert_chain_file => options[:ssl_cert], :private_key_file => options[:ssl_private_key], :verify_peer => options[:ssl_verify_peer])
+      end
     end
 
     # Public: callback for when a line of the protocol has been
