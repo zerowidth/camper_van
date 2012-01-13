@@ -17,7 +17,7 @@ describe CamperVan::Server do
       @tls_started = false
     end
 
-    def start_tls
+    def start_tls(*)
       @tls_started = true
     end
 

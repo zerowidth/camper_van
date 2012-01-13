@@ -81,7 +81,7 @@ module CamperVan
 
       if options[:ssl]
         logger.info "starting TLS for #{remote_ip}"
-        start_tls
+        start_tls(:cert_chain_file => options[:ssl_cert], :private_key_file => options[:ssl_private_key], :verify_peer => options[:ssl_verify_peer])
       end
     end
 
