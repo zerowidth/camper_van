@@ -297,8 +297,10 @@ module CamperVan
           end
 
         when "Enter"
-          client.campfire_reply :join, name, channel
-          users[user.id] = User.new(user)
+          unless users[user.id]
+            client.campfire_reply :join, name, channel
+            users[user.id] = User.new(user)
+          end
 
         when "Leave", "Kick" # kick is used for idle timeouts
           client.campfire_reply :part, name, channel, "Leaving..."

@@ -403,6 +403,14 @@ describe CamperVan::Channel do
       @client.sent.last.must_match %r/:joe\S+ JOIN #test/
     end
 
+    it "does not resend a join command when a user enters the room twice" do
+      @channel.map_message_to_irc msg("Enter")
+      @client.sent.clear
+      @client.sent.last.must_equal nil
+      @channel.map_message_to_irc msg("Enter")
+      @client.sent.last.must_equal nil
+    end
+
     it "adds the user to the internal tracking list when a user joins" do
       @channel.map_message_to_irc msg("Enter")
       @client.sent.last.must_match %r/:joe\S+ JOIN #test/
