@@ -111,7 +111,6 @@ module CamperVan
     #
     # msg - the IRC PRIVMSG message contents
     #
-    # TODO: substitute "nick: " with the nick's campfire name instead
     def privmsg(msg)
 
       # convert twitter urls to tweets
@@ -260,15 +259,15 @@ module CamperVan
         # needed in most cases
         name = user ? irc_name(user.name) : nil
 
-        if %w(Text Tweet Sound Paste Upload).include?(
-          message.type.sub(/Message$/, '')) && name == client.nick
+        # strip Message off the type to simplify readability
+        type = message.type.sub(/Message$/, '')
+
+        if %w(Text Tweet Sound Paste Upload).include?(type) && name == client.nick
             logger.debug "skipping message from myself: #{message.type} #{message.body}"
           return
         end
 
-        # strip Message off the type to simplify readability
-        case message.type.sub(/Message$/,'')
-
+        case type
         when "Timestamp", "Advertisement"
           # ignore these
 

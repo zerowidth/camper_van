@@ -20,10 +20,17 @@ Usage:
   bind address defaults to 127.0.0.1
   bind port defaults to 6667
 
+To connect to campfire, connect your IRC client to camper_van and provide the
+PASS command for authentication, using your configured campfire subdomain and
+api key. For multiple subdomains, use separate connections.
+
+  PASS campfire_subdomain:api_key
+
 For irc debugging, use the debugging proxy:
 
   camper_van proxy <server> [port]
 
+Options:
   banner
 
   stop_on "proxy"

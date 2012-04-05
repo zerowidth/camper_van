@@ -50,13 +50,14 @@ password (the IRC PASS command) to be
     campfire_subdomain:api_key
 
 Connect, and `/LIST` will show you the irc channels / campfire rooms you
-have access to.
+have access to. To connect to more than one subdomain, make a separate
+connection for each.
 
 ## Development
 
 CamperVan uses:
 
-* ruby 1.9.2 + minitest
+* ruby 1.9.3 + minitest
 * [bundler](http://gembundler.com/)
 * [eventmachine](http://rubyeventmachine.com/)
 * [firering](https://github.com/EmmanuelOga/firering)
