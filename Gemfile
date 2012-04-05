@@ -8,5 +8,5 @@ gemspec
 group :development do
   gem "rb-fsevent", :require => false
   gem "growl", :require => false
-  gem "guard"
+  gem "guard-minitest"
 end
