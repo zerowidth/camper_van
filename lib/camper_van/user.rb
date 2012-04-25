@@ -48,7 +48,12 @@ module CamperVan
     def initialize(user)
       @id = user.id
       @name = user.name
-      @account, @server = user.email_address.split("@")
+      if user.email_address
+        @account, @server = user.email_address.split("@")
+      else
+        @account = "noemail"
+        @server = "noserver"
+      end
       @nick = irc_name user.name
       @idle = false
       @admin = user.admin
