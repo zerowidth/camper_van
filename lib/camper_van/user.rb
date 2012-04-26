@@ -51,8 +51,7 @@ module CamperVan
       if user.email_address
         @account, @server = user.email_address.split("@")
       else
-        @account = "noemail"
-        @server = "noserver"
+        @account = @server = "unknown"
       end
       @nick = irc_name user.name
       @idle = false
