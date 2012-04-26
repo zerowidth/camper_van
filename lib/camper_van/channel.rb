@@ -264,7 +264,7 @@ module CamperVan
 
         if %w(Text Tweet Sound Paste Upload).include?(type) && name == client.nick
             logger.debug "skipping message from myself: #{message.type} #{message.body}"
-          return
+          next
         end
 
         case type

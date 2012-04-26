@@ -4,6 +4,7 @@ describe CamperVan::Channel do
 
   class TestClient
     attr_reader :sent, :nick, :user, :host
+    attr_writer :nick
     include CamperVan::ServerReply
     def initialize
       @nick, @user, @host = "nathan", "nathan", "localhost"
@@ -301,6 +302,12 @@ describe CamperVan::Channel do
       TestMessage.new(
         attributes.merge :type => "#{type}Message", :id => 1234
       )
+    end
+
+    it "skips text messages from the current user" do
+      @client.nick = "joe"
+      @channel.map_message_to_irc msg("Text", :body => "hello", :user_id => 10)
+      @client.sent.last.must_equal nil
     end
 
     it "sends a privmsg with the message when a user says something" do
