@@ -19,7 +19,7 @@ Gem::Specification.new do |s|
   s.require_paths = ["lib"]
 
   s.add_dependency "eventmachine", "~> 0.12.10"
-  s.add_dependency "firering", "~> 1.1.0"
+  s.add_dependency "firering", "~> 1.2.0"
   s.add_dependency "logging", "~> 1.5.1"
   s.add_dependency "trollop", "~> 1.16.2"
 

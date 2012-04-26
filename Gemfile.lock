@@ -3,7 +3,7 @@ PATH
   specs:
     camper_van (0.0.3)
       eventmachine (~> 0.12.10)
-      firering (~> 1.1.0)
+      firering (~> 1.2.0)
       logging (~> 1.5.1)
       trollop (~> 1.16.2)
 
@@ -18,7 +18,7 @@ GEM
     escape_utils (0.2.4)
     eventmachine (0.12.10)
     ffi (1.0.11)
-    firering (1.1.1)
+    firering (1.2.2)
       em-http-request (~> 0.3.0)
       eventmachine (~> 0.12.10)
       yajl-ruby (~> 0.7.6)
