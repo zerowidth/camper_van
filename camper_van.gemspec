@@ -18,6 +18,8 @@ Gem::Specification.new do |s|
   s.executables   = `git ls-files -- bin/*`.split("\n").map{ |f| File.basename(f) }
   s.require_paths = ["lib"]
 
+  s.required_ruby_version = "~> 1.9.2"
+
   s.add_dependency "eventmachine", "~> 0.12.10"
   s.add_dependency "firering", "~> 1.2.0"
   s.add_dependency "logging", "~> 1.5.1"
