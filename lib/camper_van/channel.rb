@@ -242,8 +242,10 @@ module CamperVan
 
     # Stream messages from campfire and map them to IRC commands for the
     # connected client.
+    #
+    # Only starts the stream once.
     def stream_campfire_to_channel
-      @stream = room.stream do |message|
+      @stream ||= room.stream do |message|
         map_message_to_irc message
       end
     end

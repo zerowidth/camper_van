@@ -21,6 +21,7 @@ describe CamperVan::Channel do
   class TestRoom
     attr_reader :locked, :full, :topic, :membership_limit
     attr_reader :sent
+    attr_reader :stream_count
 
     attr_writer :users, :topic, :locked, :full, :open_to_guests
     attr_writer :stream
@@ -29,6 +30,7 @@ describe CamperVan::Channel do
       @users = []
       @sent = []
       @membership_limit = 12
+      @stream_count = 0
     end
 
     def id
@@ -62,10 +64,11 @@ describe CamperVan::Channel do
     end
 
     def stream
+      @stream_count += 1
       if @messages
         @messages.each { |m| yield m }
       end
-      return @stream
+      @stream ||= "message stream" # must be truthy
     end
   end
 
@@ -105,6 +108,12 @@ describe CamperVan::Channel do
       ]
       @channel.join
       @client.sent[2].must_equal ":camper_van 353 nathan = #test :nathan bob joe"
+    end
+
+    it "does not stream messages from the room on a second join" do
+      @channel.join
+      @channel.join
+      @room.stream_count.must_equal 1
     end
   end
 
