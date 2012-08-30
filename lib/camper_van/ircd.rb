@@ -187,6 +187,11 @@ module CamperVan
 
     handle :part do |args|
       name = args.first
+      # FIXME parting a channel should remove the channel from channels, except
+      # that there's a bug with EM that won't disconnect the streaming request.
+      # Because of that, leave the channel in the list, and assume the irc
+      # client attached to this IRCD will ignore messages from channels it's not
+      # currently in.
       if channel = channels[name]
         channel.part
       else
@@ -326,7 +331,7 @@ module CamperVan
     def join_channel(name)
       campfire.rooms do |rooms|
         if room = rooms.detect { |r| "#" + irc_name(r.name) == name }
-          channel = Channel.new(name, self, room)
+          channel = channels[name] || Channel.new(name, self, room)
           if channel.join
             channels[name] = channel
           end

@@ -86,6 +86,7 @@ module CamperVan
     # connections: allowing them to time out rather than leaving explicitly.
     def part
       client.user_reply :part, channel
+      # FIXME this doesn't work. Not even on next_tick. EM/em-http-request bug?
       stream.close_connection if stream
       # room.leave # let the timeout do it rather than being explicit!
     end
