@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    camper_van (0.0.3)
+    camper_van (0.0.5)
       eventmachine (~> 0.12.10)
       firering (~> 1.2.0)
       logging (~> 1.5.1)
