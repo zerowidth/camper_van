@@ -312,11 +312,11 @@ module CamperVan
           lines = message.body.split("\n")
 
           lines[0..2].each do |line|
-            client.campfire_reply :privmsg, name, channel, "> " + line
+            client.campfire_reply :privmsg, name, channel, ":> " + line
           end
 
           if lines.size > 3
-            client.campfire_reply :privmsg, name, channel, "> more: " +
+            client.campfire_reply :privmsg, name, channel, ":> more: " +
               "https://#{client.subdomain}.campfirenow.com/room/#{room.id}/paste/#{message.id}"
           end
 
@@ -352,7 +352,7 @@ module CamperVan
             else
               body = message.body
             end
-            client.campfire_reply :privmsg, name, channel, body
+            client.campfire_reply :privmsg, name, channel, ":" + body
           end
 
         when "TopicChange"

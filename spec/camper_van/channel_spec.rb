@@ -320,8 +320,8 @@ describe CamperVan::Channel do
     end
 
     it "sends a privmsg with the message when a user says something" do
-      @channel.map_message_to_irc msg("Text", :body => "hello")
-      @client.sent.last.must_match ":joe!joe@campfire PRIVMSG #test hello"
+      @channel.map_message_to_irc msg("Text", :body => "hello there")
+      @client.sent.last.must_match ":joe!joe@campfire PRIVMSG #test :hello there"
     end
 
     it "sends a privmsg with the pasted url and the first line when a user pastes something" do
@@ -355,7 +355,7 @@ describe CamperVan::Channel do
       ]
       @channel.list_users
       @channel.map_message_to_irc msg("Text", :body => "Bob Fred")
-      @client.sent.last.must_match %r(PRIVMSG #test bob_fred)
+      @client.sent.last.must_match %r(PRIVMSG #test :bob_fred)
     end
 
     it "converts leading names plus punctuation to nicks" do
