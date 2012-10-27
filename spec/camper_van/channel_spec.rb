@@ -26,6 +26,8 @@ describe CamperVan::Channel do
     attr_writer :users, :topic, :locked, :full, :open_to_guests
     attr_writer :stream
 
+    attr_accessor :connection
+
     def initialize
       @users = []
       @sent = []
@@ -455,8 +457,16 @@ describe CamperVan::Channel do
     end
 
     it "sends a message containing the upload link when a user uploads a file" do
-      @channel.map_message_to_irc msg("Upload", :body => "filename")
-      @client.sent.last.must_match %r(:joe\S+ PRIVMSG #test .*uploads/1234/filename)
+      conn = Class.new do
+        def http(method, url)
+          raise "bad method #{method}" unless method == :get
+          raise "bad url #{url}" unless url == "/room/456/messages/1234/upload.json"
+          yield :upload => {:full_url => "filename"}
+        end
+      end.new
+      @room.connection = conn
+      @channel.map_message_to_irc msg("Upload", :body => "filename", :room_id => 456)
+      @client.sent.last.must_match %r(:joe\S+ PRIVMSG #test .* filename)
     end
 
     it "sends a message containing the tweet url when a user posts a tweet" do

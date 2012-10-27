@@ -361,8 +361,9 @@ module CamperVan
           # client.numeric_reply :rpl_topic, channel, ':' + message.body
 
         when "Upload"
-          client.campfire_reply :privmsg, name, channel, ":\01ACTION uploaded " +
-            "https://#{client.subdomain}.campfirenow.com/room/#{room.id}/uploads/#{message.id}/#{message.body}"
+          room.connection.http(:get, "/room/#{message.room_id}/messages/#{message.id}/upload.json") do |data|
+            client.campfire_reply :privmsg, name, channel, ":\01ACTION uploaded " + data[:upload][:full_url]
+          end
 
         when "Tweet"
           # stringify keys since campfire API is inconsistent about it
