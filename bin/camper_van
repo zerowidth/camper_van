@@ -35,6 +35,7 @@ Options:
 
   stop_on "proxy"
 
+  opt :crlf, "Enable CR/LF"
   opt :log_level, "Log level", :default => "info"
   opt :log_file, "Log file", :short => "f", :type => :string
   opt :ssl, "Enable SSL for IRC client connections"

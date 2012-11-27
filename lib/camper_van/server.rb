@@ -77,7 +77,7 @@ module CamperVan
       logger.info "got connection from #{remote_ip}"
 
       # initialize the line-based protocol: IRC is \r\n
-      @lt2_delimiter = "\r\n"
+      @lt2_delimiter = "\r\n" if @options[:crlf]
 
       # start up the IRCD for this connection
       @ircd = IRCD.new(self)
