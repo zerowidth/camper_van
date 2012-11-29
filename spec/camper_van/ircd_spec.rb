@@ -173,12 +173,12 @@ describe CamperVan::IRCD do
         @server.handle :mode => ["#test", "-i"]
       end
 
-      context "with an unknown mode argument" do
-        it "responds with an error" do
-          @server.handle :mode => ["#test", "-t"]
-          @connection.sent.last.must_match /472 nathan t :Unknown mode t/
-        end
-      end
+      # context "with an unknown mode argument" do
+      #   it "responds with an error" do
+      #     @server.handle :mode => ["#test", "-t"]
+      #     @connection.sent.last.must_match /472 nathan t :Unknown mode t/
+      #   end
+      # end
 
     end
 
@@ -235,4 +235,3 @@ describe CamperVan::IRCD do
   end
 
 end
-
