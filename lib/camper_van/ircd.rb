@@ -221,15 +221,18 @@ module CamperVan
       end
     end
 
+    handle :history do |args|
+      if channel = channels[args.first]
+        channel.history
+      end
+    end
+
     handle :mode do |args|
       if channel = channels[args.shift]
 
         if mode = args.first
           if mode =~ /^[+-][si]$/
             channel.set_mode mode
-          else
-            mode = mode.gsub(/\W/,'')
-            numeric_reply :err_unknownmode, mode, "Unknown mode #{mode}"
           end
         else
           channel.current_mode
@@ -343,4 +346,3 @@ module CamperVan
 
   end
 end
-
