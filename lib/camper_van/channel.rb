@@ -195,6 +195,16 @@ module CamperVan
       end
     end
 
+    # Public: retrieves the transcript for the day.
+    def history
+      room.today_transcript do |msgs|
+        msgs.reject { |m| not ["TextMessage", "PasteMessage", "TweetMessage"].member? m.type }.last(25).each do |msg|
+#          logger.info "#{msg.body}"
+          map_message_to_irc msg
+        end
+      end
+    end
+
     # Get the list of users from a room, and update the internal
     # tracking state as well as the connected client. If the user list
     # is out of sync, the irc client may receive the associated
@@ -339,7 +349,7 @@ module CamperVan
         # when "System"
         #   # NOTICE from :camper_van to channel?
 
-        when "Text"
+        when "Text", "Tweet"
           if message.body =~ /^\*.*\*$/
             client.campfire_reply :privmsg, name, channel, ":\01ACTION " + message.body[1..-2] + "\01"
           else
@@ -365,13 +375,13 @@ module CamperVan
             client.campfire_reply :privmsg, name, channel, ":\01ACTION uploaded " + data[:upload][:full_url]
           end
 
-        when "Tweet"
+        # when "Tweet"
           # stringify keys since campfire API is inconsistent about it
-          tweet = stringify_keys(YAML.load(message.body))
-          client.campfire_reply :privmsg, name, channel,
-            "@#{tweet["author_username"]}: #{tweet["message"]}" +
-            " (https://twitter.com/#{tweet["author_username"]}" +
-            "/status/#{tweet["id"]})"
+          # tweet = stringify_keys(YAML.load(message.body))
+          # client.campfire_reply :privmsg, name, channel,
+          #   "@#{tweet["author_username"]}: #{tweet["message"]}" +
+          #   " (https://twitter.com/#{tweet["author_username"]}" +
+          #   "/status/#{tweet["id"]})"
 
         else
           logger.warn "unknown message #{message.type}: #{message.body}"
@@ -397,4 +407,3 @@ module CamperVan
 
   end
 end
-

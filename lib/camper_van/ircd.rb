@@ -221,6 +221,12 @@ module CamperVan
       end
     end
 
+    handle :history do |args|
+      if channel = channels[args.first]
+        channel.history
+      end
+    end
+
     handle :mode do |args|
       if channel = channels[args.shift]
 
