@@ -366,12 +366,7 @@ module CamperVan
           end
 
         when "Tweet"
-          # stringify keys since campfire API is inconsistent about it
-          tweet = stringify_keys(YAML.load(message.body))
-          client.campfire_reply :privmsg, name, channel,
-            "@#{tweet["author_username"]}: #{tweet["message"]}" +
-            " (https://twitter.com/#{tweet["author_username"]}" +
-            "/status/#{tweet["id"]})"
+          client.campfire_reply :privmsg, name, channel, message.body
 
         else
           logger.warn "unknown message #{message.type}: #{message.body}"
