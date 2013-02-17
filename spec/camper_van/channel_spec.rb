@@ -476,24 +476,8 @@ describe CamperVan::Channel do
     end
 
     it "sends a message containing the tweet url when a user posts a tweet" do
-      body = {
-        "id" => 12345,
-        "author_username" => "aniero",
-        "message" => "hello, twitter",
-        "author_avatar_url" => "http://example.com/url.img"
-      }
-      @channel.map_message_to_irc msg("Tweet", :body => body.to_yaml)
-      @client.sent.last.must_match %r(:joe\S+ PRIVMSG #test .*twitter.com/aniero/status/12345.*)
-    end
-
-    it "sends a message containing the tweet url when a user posts a tweet with symbols" do
-      body = {
-        :id => 12345,
-        :author_username => "aniero",
-        :message => "hello, twitter",
-        :author_avatar_url => "http://example.com/url.img"
-      }
-      @channel.map_message_to_irc msg("Tweet", :body => body.to_yaml)
+      body = "hello world -- @author, twitter.com/aniero/status/12345.*"
+      @channel.map_message_to_irc msg("Tweet", :body => body)
       @client.sent.last.must_match %r(:joe\S+ PRIVMSG #test .*twitter.com/aniero/status/12345.*)
     end
 
