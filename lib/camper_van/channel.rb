@@ -56,7 +56,7 @@ module CamperVan
           client.user_reply :join, ":#{channel}"
 
           # current topic
-          client.numeric_reply :rpl_topic, channel, ':' + room.topic
+          client.numeric_reply :rpl_topic, channel, ':' + (room.topic || "")
 
           # List the current users, which must always include myself
           # (race condition, server may not realize the user has joined yet)

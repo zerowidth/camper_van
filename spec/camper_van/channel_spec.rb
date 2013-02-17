@@ -92,6 +92,12 @@ describe CamperVan::Channel do
       @client.sent[1].must_equal ":camper_van 332 nathan #test :the topic"
     end
 
+    it "sends the topic as a command even if the topic is nil" do
+      @room.topic = nil
+      @channel.join
+      @client.sent[1].must_equal ":camper_van 332 nathan #test :"
+    end
+
     it "sends the list of users" do
       @room.users = [
         OpenStruct.new(:id => 10, :name => "Nathan", :email_address => "x@y.com"),
