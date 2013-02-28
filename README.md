@@ -69,7 +69,7 @@ CamperVan uses:
 
 ## License
 
-See LICENSE for details.
+MIT, See LICENSE for details.
 
 ## Contributing
 
