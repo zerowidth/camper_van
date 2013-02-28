@@ -42,6 +42,12 @@ describe CamperVan::IRCD do
       @server.api_key.must_equal "asdf1234"
     end
 
+    it "only uses the subdomain if a full domain is specified" do
+      @server.handle :pass => ["test.campfirenow.com:asdf1234"]
+      @server.subdomain.must_equal "test"
+      @server.api_key.must_equal "asdf1234"
+    end
+
     it "saves the nickname from the NICK command" do
       @server.handle :nick => ["nathan"]
       @server.nick.must_equal "nathan"
