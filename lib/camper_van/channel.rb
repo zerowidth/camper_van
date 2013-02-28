@@ -309,7 +309,7 @@ module CamperVan
           users.delete user.id
 
         when "Paste"
-          lines = message.body.split("\n")
+          lines = message.body.split(/\n|\r\n|\r/)
 
           lines[0..2].each do |line|
             client.campfire_reply :privmsg, name, channel, ":> " + line
@@ -352,7 +352,9 @@ module CamperVan
             else
               body = message.body
             end
-            client.campfire_reply :privmsg, name, channel, ":" + body
+            body.split(/[\r\n]+/).each do |line|
+              client.campfire_reply :privmsg, name, channel, ":" + line
+            end
           end
 
         when "TopicChange"
@@ -366,7 +368,9 @@ module CamperVan
           end
 
         when "Tweet"
-          client.campfire_reply :privmsg, name, channel, message.body
+          message.body.split(/\n|\r\n|\r/).each do |line|
+            client.campfire_reply :privmsg, name, channel, line
+          end
 
         else
           logger.warn "unknown message #{message.type}: #{message.body}"

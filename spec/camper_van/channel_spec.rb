@@ -332,6 +332,18 @@ describe CamperVan::Channel do
       @client.sent.last.must_match ":joe!joe@campfire PRIVMSG #test :hello there"
     end
 
+    it "splits text messages on newline and carriage returns" do
+      @channel.map_message_to_irc msg("Text", :body => "hello\n\r\r\nthere")
+      @client.sent[-2].must_match ":joe!joe@campfire PRIVMSG #test :hello"
+      @client.sent[-1].must_match ":joe!joe@campfire PRIVMSG #test :there"
+    end
+
+    it "sends the first few lines, split by newline or carriage return, for a paste" do
+      @channel.map_message_to_irc msg("Paste", :body => "foo\r\nbar\nbaz\nbleh")
+      @client.sent[-4].must_match %r(:joe\S+ PRIVMSG #test :> foo)
+      @client.sent.last.must_match %r(:joe\S+ PRIVMSG #test .*room/10/paste/1234)
+    end
+
     it "sends a privmsg with the pasted url and the first line when a user pastes something" do
       @channel.map_message_to_irc msg("Paste", :body => "foo\nbar\nbaz\nbleh")
       @client.sent.last.must_match %r(:joe\S+ PRIVMSG #test .*room/10/paste/1234)
@@ -479,6 +491,13 @@ describe CamperVan::Channel do
       body = "hello world -- @author, twitter.com/aniero/status/12345.*"
       @channel.map_message_to_irc msg("Tweet", :body => body)
       @client.sent.last.must_match %r(:joe\S+ PRIVMSG #test .*twitter.com/aniero/status/12345.*)
+    end
+
+    it "splits on newline or carriage returns in tweets" do
+      body = "hello world\nsays me -- @author, twitter.com/aniero/status/12345.*"
+      @channel.map_message_to_irc msg("Tweet", :body => body)
+      @client.sent[-2].must_match %r(:joe\S+ PRIVMSG #test :hello world)
+      @client.sent.last.must_match %r(:joe\S+ PRIVMSG #test :says.*twitter.com/aniero/status/12345.*)
     end
 
     # it "sends a notice with the message when the system sends a message"
