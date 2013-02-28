@@ -53,6 +53,9 @@ Connect, and `/LIST` will show you the irc channels / campfire rooms you
 have access to. To connect to more than one subdomain, make a separate
 connection for each.
 
+Your campfire subdomain should be just the subdomain part. If your campfire url
+is `mycompany.campfirenow.com`, your subdomain would be `mycompany`.
+
 ## Development
 
 CamperVan uses:

@@ -95,6 +95,8 @@ module CamperVan
         shutdown
       else
         @subdomain, @api_key = *args.first.split(":")
+        # ignore full "mycompany.campfirenow.com" being set as the subdomain
+        @subdomain = subdomain.split(".").first
       end
     end
 
