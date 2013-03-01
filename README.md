@@ -56,6 +56,61 @@ connection for each.
 Your campfire subdomain should be just the subdomain part. If your campfire url
 is `mycompany.campfirenow.com`, your subdomain would be `mycompany`.
 
+### Running CamperVan as a service on OS X using a launch daemon
+
+Assuming you use RVM for managing rubies, here is how you could bring up 
+camper_van as a service on OS X using launchctl. 
+
+As a first step, use the file below as a template to create a plist file 
+for campervan (named as, say, localhost.camper_van.plist) and 
+save it under /Library/LaunchDaemons.
+
+    <?xml version="1.0" encoding="UTF-8"?>
+    <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN"
+    "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+    <plist version="1.0">
+    <dict>
+    <key>Label</key>
+    <string>localhost.camper_van</string>
+    <key>EnvironmentVariables</key>
+    <dict>
+      <key>HOME</key>
+      <string>~</string>    
+      <key>PATH</key>
+      <string>$HOME/.rvm/gems/ruby-1.9.3-p327@global/bin:$HOME/.rvm/rubies/ruby-1.9.3-p327/bin:$PATH</string>
+      <key>GEM_PATH</key>
+      <string>$HOME/.rvm/gems/ruby-1.9.3-p327@global:$HOME/.rvm/gems/ruby-1.9.3-p327</string>
+    </dict>
+    <key>ProgramArguments</key>
+    <array>
+     <string>$HOME/.rvm/gems/ruby-1.9.3-p327@global/bin/bundle</string>
+     <string>exec</string>
+      <string>/opt/gitpub/camper_van_exec/bin/camper_van</string>
+    </array>
+    <key>WorkingDirectory</key>
+    <string>$PATH_TO_PROJECT_ROOT/camper_van_exec</string>
+    <key>UserName</key>
+    <string>ujarajapu1</string>
+    <key>StandardOutPath</key>
+    <string>$PATH_TO_PROJECT_ROOT/camper_van_exec/logs/camper_van.log</string>
+    <key>StandardErrorPath</key>
+    <string>$PATH_TO_PROJECT_ROOTb/camper_van_exec/logs/camper_van_errors.log</string>
+    <key>RunAtLoad</key>
+    <true/>
+    <key>KeepAlive</key>
+    <true/>
+    </dict>
+    </plist>
+    
+As a second step, run the following command to make sure the service is launched.
+
+    sudo launchctl load -w localhost.camper_van.plist
+
+To unload the service, use the unload keyword.
+
+    sudo launchctl unload -w localhost.camper_van.plist
+
+
 ## Development
 
 CamperVan uses:
