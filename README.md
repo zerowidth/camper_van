@@ -56,6 +56,43 @@ connection for each.
 Your campfire subdomain should be just the subdomain part. If your campfire url
 is `mycompany.campfirenow.com`, your subdomain would be `mycompany`.
 
+### Running campfire on OS X using launchctl
+
+    <?xml version="1.0" encoding="UTF-8"?>
+    <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN"
+    "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+    <plist version="1.0">
+    <dict>
+    <key>Label</key>
+    <string>localhost.camper_van</string>
+    <key>EnvironmentVariables</key>
+    <dict>
+      <key>PATH</key>
+      <string>$HOME/.rvm/gems/ruby-1.9.3-p327@global/bin:$HOME/.rvm/rubies/ruby-1.9.3-p327/bin:$PATH</string>
+      <key>GEM_PATH</key>
+      <string>$HOME/.rvm/gems/ruby-1.9.3-p327@global:$HOME/.rvm/gems/ruby-1.9.3-p327</string>
+    </dict>
+    <key>ProgramArguments</key>
+    <array>
+     <string>$HOME/.rvm/gems/ruby-1.9.3-p327@global/bin/bundle</string>
+     <string>exec</string>
+      <string>$PROJECT_ROOT/camper_van_exec/bin/camper_van</string>
+    </array>
+    <key>WorkingDirectory</key>
+    <string>$PROJECT_ROOT/camper_van_exec</string>
+    <key>UserName</key>
+    <string>$USER</string>
+    <key>StandardOutPath</key>
+    <string>$PROJECT_ROOT/camper_van_exec/logs/camper_van.log</string>
+    <key>StandardErrorPath</key>
+    <string>$PROJECT_ROOT/camper_van_exec/logs/camper_van_errors.log</string>
+    <key>RunAtLoad</key>
+    <true/>
+    <key>KeepAlive</key>
+    <true/>
+    </dict>
+    </plist>
+
 ## Development
 
 CamperVan uses:
