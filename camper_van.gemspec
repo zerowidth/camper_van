@@ -7,7 +7,7 @@ Gem::Specification.new do |s|
   s.version     = CamperVan::VERSION
   s.authors     = ["Nathan Witmer"]
   s.email       = ["nwitmer@gmail.com"]
-  s.homepage    = "https://github.com/aniero/camper_van"
+  s.homepage    = "https://github.com/zerowidth/camper_van"
   s.summary     = %q{An IRC to Campfire bridge}
   s.description = %q{An IRC to Campfire bridge for IRC-based access to campfire chatrooms}
 
