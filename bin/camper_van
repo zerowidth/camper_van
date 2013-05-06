@@ -41,6 +41,11 @@ Options:
   opt :ssl_private_key, "Path to SSL private key file for IRC client connections, defaults to self-signed", :type => :string
   opt :ssl_cert, "Path to SSL cert file for IRC client connections, defaults to self-signed", :type => :string
   opt :ssl_verify_peer, "Verify peers for IRC client connections"
+
+  opt :daemon, 'Daemonizes the process'
+
+  opt :pid, 'Path of the PID file', :type => :string,
+    :default => '/var/run/camper_van.pid'
 end
 
 opts = Trollop.with_standard_exception_handling parser do
@@ -69,7 +74,9 @@ else
     :ssl => opts[:ssl],
     :ssl_private_key => opts[:ssl_private_key],
     :ssl_cert => opts[:ssl_cert],
-    :ssl_verify_peer => opts[:ssl_verify_peer]
+    :ssl_verify_peer => opts[:ssl_verify_peer],
+    :daemon => opts[:daemon],
+    :pid => opts[:pid]
   )
 
 end
