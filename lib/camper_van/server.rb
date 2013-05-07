@@ -54,6 +54,8 @@ module CamperVan
       File.open(pid, 'w') do |handle|
         handle.write(Process.pid.to_s)
       end
+
+      Logging.reopen
     end
 
     # Initialize the logging system
