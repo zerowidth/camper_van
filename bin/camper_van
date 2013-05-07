@@ -36,17 +36,26 @@ Options:
   stop_on "proxy"
 
   opt :log_level, "Log level", :default => "info"
-  opt :log_file, "Log file", :short => "f", :type => :string
+  opt :log_file, "Log file (required when running as a daemon)", :short => "f", :type => :string
   opt :ssl, "Enable SSL for IRC client connections"
   opt :ssl_private_key, "Path to SSL private key file for IRC client connections, defaults to self-signed", :type => :string
   opt :ssl_cert, "Path to SSL cert file for IRC client connections, defaults to self-signed", :type => :string
   opt :ssl_verify_peer, "Verify peers for IRC client connections"
+
+  opt :daemon, 'Daemonizes the process'
+
+  opt :pid, 'Path of the PID file', :type => :string,
+    :default => '/var/run/camper_van.pid'
 end
 
 opts = Trollop.with_standard_exception_handling parser do
   o = parser.parse ARGV
 
   if (ARGV.first == "proxy" && ARGV.size == 1)
+    raise Trollop::HelpNeeded
+  end
+
+  if o[:daemon] and !o[:log_file]
     raise Trollop::HelpNeeded
   end
 
@@ -69,7 +78,9 @@ else
     :ssl => opts[:ssl],
     :ssl_private_key => opts[:ssl_private_key],
     :ssl_cert => opts[:ssl_cert],
-    :ssl_verify_peer => opts[:ssl_verify_peer]
+    :ssl_verify_peer => opts[:ssl_verify_peer],
+    :daemon => opts[:daemon],
+    :pid => opts[:pid]
   )
 
 end
