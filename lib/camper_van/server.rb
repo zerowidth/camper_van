@@ -14,6 +14,8 @@ module CamperVan
     #                :ssl_private_key - if using ssl, private key file to use, defaults to self-signed
     #                :ssl_cert - if using ssl, cert file to use, defaults to self-signed
     #                :ssl_verify_peer - if using ssl, verify client certificates, defaults to false
+    #                :daemon - if camper_van should daemonize itself
+    #                :pid - the path of the PID file to use.
     def self.run(bind_address="localhost", port=6667, options={})
 
       initialize_logging options
@@ -22,11 +24,38 @@ module CamperVan
         logger = Logging.logger[self.name]
         logger.info "starting server on #{bind_address}:#{port}"
         EM.start_server bind_address, port, self, options
+
+        if options[:daemon]
+          daemonize(logger, options[:pid])
+        end
+
         trap("INT") do
           logger.info "SIGINT, shutting down"
           EM.stop
         end
       end
+    end
+
+    # Turns the current process into a daemon.
+    #
+    # logger - The logger to use
+    # pid - The path to the PID file
+    #
+    def self.daemonize(logger, pid)
+      if !File.writable?(pid)
+        logger.error "The PID file #{pid} is not writable"
+        abort
+      end
+
+      logger.info "Daemonizing camper_van using PID #{pid}"
+
+      Process.daemon
+
+      File.open(pid, 'w') do |handle|
+        handle.write(Process.pid.to_s)
+      end
+
+      Logging.reopen
     end
 
     # Initialize the logging system
