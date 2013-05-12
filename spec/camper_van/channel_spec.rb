@@ -123,6 +123,18 @@ describe CamperVan::Channel do
       @channel.join
       @room.stream_count.must_equal 1
     end
+
+    it "returns an error if the room is locked" do
+      @room.locked = true
+      @channel.join
+      @client.sent.last.must_match /Cannot join #test.*locked/
+    end
+
+    it "returns an error if the room is full" do
+      @room.full = true
+      @channel.join
+      @client.sent.last.must_match /Cannot join #test.*full/
+    end
   end
 
   describe "#part" do

@@ -43,11 +43,11 @@ module CamperVan
     #   false if the room was full or locked.
     def join
       if room.locked?
-        numeric_reply :err_inviteonlychan, "Cannot join #{channel} (locked)"
+        client.numeric_reply :err_inviteonlychan, "Cannot join #{channel} (locked)"
         return false
 
       elsif room.full?
-        numeric_reply :err_channelisfull, "Cannot join #{channel} (full)"
+        client.numeric_reply :err_channelisfull, "Cannot join #{channel} (full)"
         return false
 
       else
