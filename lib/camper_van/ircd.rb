@@ -45,6 +45,8 @@ module CamperVan
       @client = client
       @active = true
       @channels = {}
+      @away = false
+      @saved_channels = nil
     end
 
     # The campfire client
@@ -243,6 +245,20 @@ module CamperVan
     end
 
     handle :away do |args|
+      if @away
+        user_reply 305, "You are no longer marked as being away"
+        @saved_channels.each do |channel|
+          join_channel channel
+        end
+        @saved_channels = nil
+      else
+        user_reply 306, "You have been marked as being away"
+        @saved_channels = channels.keys
+        channels.values.each do |channel|
+          channel.part
+        end
+      end
+      @away = !@away
       # ignore silently, there's no campfire API for this
     end
 
