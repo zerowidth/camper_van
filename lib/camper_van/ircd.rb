@@ -26,6 +26,9 @@ module CamperVan
     # Set to false when shutting down so extra commands are ignored.
     attr_reader :active
 
+    # Additional options
+    attr_reader :options
+
     MOTD = <<-motd
       Welcome to CamperVan.
       To see what campfire rooms are available to the
@@ -41,12 +44,13 @@ module CamperVan
     # Public: initialize an IRC server connection
     #
     # client - the EM connection representing the IRC client
-    def initialize(client)
+    def initialize(client, options = {})
       @client = client
       @active = true
       @channels = {}
       @away = false
       @saved_channels = nil
+      @options = options
     end
 
     # The campfire client
@@ -245,6 +249,7 @@ module CamperVan
     end
 
     handle :away do |args|
+      next unless options[:part_on_away]
       if @away
         user_reply 305, "You are no longer marked as being away"
         @saved_channels.each do |channel|

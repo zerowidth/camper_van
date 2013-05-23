@@ -46,6 +46,8 @@ Options:
 
   opt :pid, 'Path of the PID file', :type => :string,
     :default => '/var/run/camper_van.pid'
+
+  opt :part_on_away, 'Part from channels when going away'
 end
 
 opts = Trollop.with_standard_exception_handling parser do
@@ -80,7 +82,8 @@ else
     :ssl_cert => opts[:ssl_cert],
     :ssl_verify_peer => opts[:ssl_verify_peer],
     :daemon => opts[:daemon],
-    :pid => opts[:pid]
+    :pid => opts[:pid],
+    :part_on_away => opts[:part_on_away]
   )
 
 end
