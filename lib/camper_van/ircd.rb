@@ -49,7 +49,7 @@ module CamperVan
       @active = true
       @channels = {}
       @away = false
-      @saved_channels = nil
+      @saved_channels = []
       @options = options
     end
 
@@ -255,7 +255,7 @@ module CamperVan
         @saved_channels.each do |channel|
           join_channel channel
         end
-        @saved_channels = nil
+        @saved_channels = []
       else
         user_reply 306, "You have been marked as being away"
         @saved_channels = channels.keys
