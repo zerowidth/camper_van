@@ -17,7 +17,7 @@ module CamperVan
     attr_reader :subdomain, :api_key
 
     # Information for the connected user
-    attr_reader :nick, :user, :host
+    attr_reader :nick, :user, :host, :away
 
     # A Hash of connected CampfireChannels
     attr_reader :channels
