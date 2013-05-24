@@ -22,6 +22,7 @@ describe CamperVan::IRCD do
 
   class TestIRCD < CamperVan::IRCD
     attr_writer :campfire
+    attr_writer :away
   end
 
   before :each do
@@ -236,6 +237,55 @@ describe CamperVan::IRCD do
         @server.handle :quit => ["leaving..."]
       end
 
+    end
+
+    context "with an AWAY command" do
+      before :each do
+        # register
+        @server.handle :pass => ["test:1234asdf"]
+        @server.handle :nick => ["nathan"]
+        @server.handle :user => ["nathan", 0, 0, "Nathan"]
+      end
+
+      context "with part_on_away set" do
+        before :each do
+          @server.campfire = Class.new do
+            def rooms
+              yield [
+                OpenStruct.new(:name => "Test"),
+                OpenStruct.new(:name => "Day Job")
+              ]
+            end
+          end.new
+          @connection.sent.clear
+          @server.options[:part_on_away] = true
+          @server.handle :join => ["#test"]
+          @server.channels["#test"].must_be_instance_of CamperVan::Channel
+        end
+
+        it "calls #away while not away" do
+          @server.handle :away => ["bbl..."]
+          @connection.sent.last.must_equal ":nathan!nathan@127.0.0.1 PART #test"
+        end
+      end
+
+      context "without part_on_away set" do
+        it "calls #away while not away" do
+          @server.away = false
+          @server.away.must_equal false
+          @server.handle :away => ["bbl..."]
+          @server.away.must_equal true
+          @connection.sent.last.must_equal ":nathan!nathan@127.0.0.1 306 :You have been marked as being away"
+        end
+
+        it "returns from #away while away" do
+          @server.away = true
+          @server.away.must_equal true
+          @server.handle :away => []
+          @server.away.must_equal false
+          @connection.sent.last.must_equal ":nathan!nathan@127.0.0.1 305 :You are no longer marked as being away"
+        end
+      end
     end
 
   end

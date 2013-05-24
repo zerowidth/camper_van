@@ -109,7 +109,7 @@ module CamperVan
       @lt2_delimiter = "\r\n"
 
       # start up the IRCD for this connection
-      @ircd = IRCD.new(self)
+      @ircd = IRCD.new(self, options)
 
       if options[:ssl]
         logger.info "starting TLS for #{remote_ip}"
