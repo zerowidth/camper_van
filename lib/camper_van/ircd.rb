@@ -249,22 +249,24 @@ module CamperVan
     end
 
     handle :away do |args|
-      next unless options[:part_on_away]
       if @away
         user_reply 305, "You are no longer marked as being away"
-        @saved_channels.each do |channel|
-          join_channel channel
+        if options[:part_on_away]
+          @saved_channels.each do |channel|
+            join_channel channel
+          end
+          @saved_channels = []
         end
-        @saved_channels = []
       else
         user_reply 306, "You have been marked as being away"
-        @saved_channels = channels.keys
-        channels.values.each do |channel|
-          channel.part
+        if options[:part_on_away]
+          @saved_channels = channels.keys
+          channels.values.each do |channel|
+            channel.part
+          end
         end
       end
       @away = !@away
-      # ignore silently, there's no campfire API for this
     end
 
     handle :quit do |args|
