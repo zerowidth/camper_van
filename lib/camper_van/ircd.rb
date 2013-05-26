@@ -17,7 +17,7 @@ module CamperVan
     attr_reader :subdomain, :api_key
 
     # Information for the connected user
-    attr_reader :nick, :user, :host
+    attr_reader :nick, :user, :host, :away
 
     # A Hash of connected CampfireChannels
     attr_reader :channels
@@ -25,6 +25,9 @@ module CamperVan
     # Whether or not this server is actively sending/receiving data.
     # Set to false when shutting down so extra commands are ignored.
     attr_reader :active
+
+    # Additional options
+    attr_reader :options
 
     MOTD = <<-motd
       Welcome to CamperVan.
@@ -40,11 +43,18 @@ module CamperVan
 
     # Public: initialize an IRC server connection
     #
-    # client - the EM connection representing the IRC client
-    def initialize(client)
+    # client  - the EM connection representing the IRC client
+    # options - a Hash of additional options, defaults to {}
+    #           :part_on_away - leave connected campfire rooms when irc client
+    #                           goes away, rejoin when coming back
+    #
+    def initialize(client, options = {})
       @client = client
       @active = true
       @channels = {}
+      @away = false
+      @saved_channels = []
+      @options = options
     end
 
     # The campfire client
@@ -243,7 +253,24 @@ module CamperVan
     end
 
     handle :away do |args|
-      # ignore silently, there's no campfire API for this
+      if @away
+        user_reply 305, "You are no longer marked as being away"
+        if options[:part_on_away]
+          @saved_channels.each do |channel|
+            join_channel channel
+          end
+          @saved_channels = []
+        end
+      else
+        user_reply 306, "You have been marked as being away"
+        if options[:part_on_away]
+          @saved_channels = channels.keys
+          channels.values.each do |channel|
+            channel.part
+          end
+        end
+      end
+      @away = !@away
     end
 
     handle :quit do |args|
