@@ -105,6 +105,13 @@ module CamperVan
         shutdown
       else
         @subdomain, @api_key = *args.first.split(":")
+
+        # allow alternate '-' separator
+        if !@api_key
+          # split on the last occurrence of '-':
+          @subdomain, @api_key = *args.first.split(/-(?=[^-]+$)/)
+        end
+
         # ignore full "mycompany.campfirenow.com" being set as the subdomain
         @subdomain = subdomain.split(".").first
       end

@@ -44,6 +44,18 @@ describe CamperVan::IRCD do
       @server.api_key.must_equal "asdf1234"
     end
 
+    it "allows '-' as a domain/api key separator" do
+      @server.handle :pass => ["test-asdf1234"]
+      @server.subdomain.must_equal "test"
+      @server.api_key.must_equal "asdf1234"
+    end
+
+    it "uses the *last* '-' as the separator in a domain/api key pair" do
+      @server.handle :pass => ["test-subdomain-asdf1234"]
+      @server.subdomain.must_equal "test-subdomain"
+      @server.api_key.must_equal "asdf1234"
+    end
+
     it "only uses the subdomain if a full domain is specified" do
       @server.handle :pass => ["test.campfirenow.com:asdf1234"]
       @server.subdomain.must_equal "test"
