@@ -23,6 +23,7 @@ describe CamperVan::IRCD do
   class TestIRCD < CamperVan::IRCD
     attr_writer :campfire
     attr_writer :away
+    attr_accessor :saved_channels
   end
 
   before :each do
@@ -249,6 +250,8 @@ describe CamperVan::IRCD do
 
       context "with part_on_away set" do
         before :each do
+          @server.options[:part_on_away] = true
+
           @server.campfire = Class.new do
             def rooms
               yield [
@@ -257,22 +260,37 @@ describe CamperVan::IRCD do
               ]
             end
           end.new
-          @connection.sent.clear
-          @server.options[:part_on_away] = true
+
           @server.handle :join => ["#test"]
-          @server.channels["#test"].must_be_instance_of CamperVan::Channel
+          @channel = MiniTest::Mock.new
+          @server.channels["#test"] = @channel
+
+          @connection.sent.clear
         end
 
-        it "calls #away while not away" do
+        after :each do
+          @channel.verify
+        end
+
+        it "parts joined channels when not away" do
+          @channel.expect :part, nil
+          @server.away = false
           @server.handle :away => ["bbl..."]
-          @connection.sent.last.must_equal ":nathan!nathan@127.0.0.1 PART #test"
+          @server.away.must_equal true
+        end
+
+        it "rejoins previous channels when away" do
+          @channel.expect :join, nil
+          @server.saved_channels = ["#test"]
+          @server.away = true
+          @server.handle :away => []
+          @server.away.must_equal false
         end
       end
 
       context "without part_on_away set" do
         it "calls #away while not away" do
           @server.away = false
-          @server.away.must_equal false
           @server.handle :away => ["bbl..."]
           @server.away.must_equal true
           @connection.sent.last.must_equal ":nathan!nathan@127.0.0.1 306 :You have been marked as being away"
@@ -280,7 +298,6 @@ describe CamperVan::IRCD do
 
         it "returns from #away while away" do
           @server.away = true
-          @server.away.must_equal true
           @server.handle :away => []
           @server.away.must_equal false
           @connection.sent.last.must_equal ":nathan!nathan@127.0.0.1 305 :You are no longer marked as being away"

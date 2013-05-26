@@ -43,7 +43,11 @@ module CamperVan
 
     # Public: initialize an IRC server connection
     #
-    # client - the EM connection representing the IRC client
+    # client  - the EM connection representing the IRC client
+    # options - a Hash of additional options, defaults to {}
+    #           :part_on_away - leave connected campfire rooms when irc client
+    #                           goes away, rejoin when coming back
+    #
     def initialize(client, options = {})
       @client = client
       @active = true
