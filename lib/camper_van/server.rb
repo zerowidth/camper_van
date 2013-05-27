@@ -42,7 +42,7 @@ module CamperVan
     # pid - The path to the PID file
     #
     def self.daemonize(logger, pid)
-      if !File.writable?(pid)
+      if !File.writable?(File.dirname(pid))
         logger.error "The PID file #{pid} is not writable"
         abort
       end
