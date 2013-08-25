@@ -37,26 +37,29 @@ bidirectionally. Some of the mappings are:
 ### Installation
 
     gem install camper_van
+
+### Command-line Options
+
     camper_van --help
 
 ### Running CamperVan
 
     camper_van
 
-Then, from your IRC client, set up a connection to `localhost:6667`. To
-authenticate with Campfire, you must configure your connection's
-password (the IRC PASS command) to be
+From your IRC client, set up a connection to `localhost:6667`. To authenticate
+with Campfire, you must configure your connection's password (the IRC PASS
+command) to be:
 
     campfire_subdomain:api_key
 
-Connect, and `/LIST` will show you the irc channels / campfire rooms you
+Connect, and `/LIST` will show you the IRC channels / campfire rooms you
 have access to. To connect to more than one subdomain, make a separate
 connection for each.
 
-If your IRC client (mIRC) doesn't allow `:` in the password, you can use `-`.
-
 Your campfire subdomain should be just the subdomain part. If your campfire url
-is `mycompany.campfirenow.com`, your subdomain would be `mycompany`.
+is `mycompany.campfirenow.com`, the subdomain would be `mycompany`.
+
+If your IRC client (mIRC) doesn't allow `:` in the password, you can use `-`.
 
 ## Development
 
