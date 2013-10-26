@@ -7,6 +7,5 @@ gemspec
 # for local mac development only
 group :development do
   gem "rb-fsevent", :require => false
-  gem "growl", :require => false
   gem "guard-minitest"
 end
