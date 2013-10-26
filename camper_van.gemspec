@@ -10,6 +10,7 @@ Gem::Specification.new do |s|
   s.homepage    = "https://github.com/zerowidth/camper_van"
   s.summary     = %q{An IRC to Campfire bridge}
   s.description = %q{An IRC to Campfire bridge for IRC-based access to campfire chatrooms}
+  s.license     = "MIT"
 
   s.rubyforge_project = "camper_van"
 
