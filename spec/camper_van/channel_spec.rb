@@ -22,6 +22,7 @@ describe CamperVan::Channel do
     attr_reader :locked, :full, :topic, :membership_limit
     attr_reader :sent
     attr_reader :stream_count
+    attr_reader :left
 
     attr_writer :users, :topic, :locked, :full, :open_to_guests
     attr_writer :stream
@@ -50,6 +51,10 @@ describe CamperVan::Channel do
     end
     def join
       yield
+    end
+
+    def leave
+      @left = true
     end
 
     def users
@@ -144,12 +149,38 @@ describe CamperVan::Channel do
     end
 
     it "closes the connection on the stream" do
-      @room.stream = MiniTest::Mock.new
-      @room.stream.expect(:close_connection, nil)
+      stream = Class.new do
+        attr_reader :closed
+        def close_connection
+          @closed = true
+        end
+      end
+
+      @room.stream = stream.new
       @channel.stream_campfire_to_channel # sets up stream
       @channel.part
 
-      @room.stream.verify
+      assert @room.stream.closed
+    end
+
+    it "closes the em-http connection if present" do
+      stream = Class.new do
+        attr_reader :closed
+        def close # em-http defines this
+          @closed = true
+        end
+      end
+
+      @room.stream = stream.new
+      @channel.stream_campfire_to_channel # sets up stream
+      @channel.part
+
+      assert @room.stream.closed
+    end
+
+    it "leaves the channel" do
+      @channel.part
+      assert @room.left
     end
   end
 

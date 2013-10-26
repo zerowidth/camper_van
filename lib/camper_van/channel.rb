@@ -78,19 +78,13 @@ module CamperVan
 
     # Public: "leaves" a campfire room, per the PART irc command.
     # Confirms with the connected client to PART the channel.
-    #
-    # Does not actually leave the campfire room, just closes out the campfire
-    # connections, so the server can idle the connection out. This behavior
-    # was chosen so periodic joins/parts wouldn't spam the campfire rooms
-    # unnecessarily, and also to reflect how Propane et. al. treat open
-    # connections: allowing them to time out rather than leaving explicitly.
     def part
       client.user_reply :part, channel
       if stream
-        stream.close if stream.respond_to?('close') # EM/em-http-request gem is installed and uses .close
-        stream.close_connection if stream.respond_to?('close_connection')
+        stream.close if stream.respond_to?(:close) # EM/em-http-request gem is installed and uses .close
+        stream.close_connection if stream.respond_to?(:close_connection)
       end
-      # room.leave # let the timeout do it rather than being explicit!
+      room.leave
     end
 
     # Public: replies to a WHO command with a list of users for a campfire room,
