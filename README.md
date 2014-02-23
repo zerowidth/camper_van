@@ -59,9 +59,8 @@ connection for each.
 Your campfire subdomain should be just the subdomain part. If your campfire url
 is `mycompany.campfirenow.com`, the subdomain would be `mycompany`.
 
-### Multilpe campfire subdomains
-
-After you start up the camper_van application, all you have to do is start up another connection with another to `localhost:6667` with the `campfire_other_subdomain:api_key`.
+CamperVan supports multiple simultaneous connections. Simply open a new
+connection and use `other_subdomain:other_api_key` for authentication.
 
 If your IRC client (mIRC) doesn't allow `:` in the password, you can use `-`.
 
