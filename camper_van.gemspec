@@ -21,10 +21,10 @@ Gem::Specification.new do |s|
 
   s.required_ruby_version = "> 1.9.2"
 
-  s.add_dependency "eventmachine", "~> 1.0.3"
-  s.add_dependency "firering", "~> 1.3.0"
-  s.add_dependency "logging", "~> 1.5.1"
-  s.add_dependency "trollop", "~> 1.16.2"
+  s.add_dependency "eventmachine", "~> 1.0", ">= 1.0.3"
+  s.add_dependency "firering", "~> 1.3", ">= 1.3.0"
+  s.add_dependency "logging", "~> 1.5", ">= 1.5.1"
+  s.add_dependency "trollop", "~> 1.16", ">= 1.16.2"
 
   s.add_development_dependency "rake"
 end
