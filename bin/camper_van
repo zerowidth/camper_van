@@ -48,6 +48,7 @@ Options:
     :default => '/var/run/camper_van.pid'
 
   opt :part_on_away, 'Part from channels when going away'
+  opt :subdomain, 'Campfire subdomain comma separated list to restrict the access to (optional)', :type => :string
 end
 
 opts = Trollop.with_standard_exception_handling parser do
@@ -83,7 +84,8 @@ else
     :ssl_verify_peer => opts[:ssl_verify_peer],
     :daemon => opts[:daemon],
     :pid => opts[:pid],
-    :part_on_away => opts[:part_on_away]
+    :part_on_away => opts[:part_on_away],
+    :subdomain => opts[:subdomain]
   )
 
 end
