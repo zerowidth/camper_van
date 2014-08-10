@@ -118,7 +118,7 @@ module CamperVan
         msg.sub! /^\01ACTION (.*)\01$/, '*\1*'
 
         users.values.each do |user|
-          msg.sub!(/#{user.nick}/, user.name)
+          msg.sub!(/\b#{user.nick}\b/, user.name)
         end
 
         room.text(msg) { } # async, no-op callback

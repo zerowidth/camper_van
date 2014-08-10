@@ -265,6 +265,18 @@ describe CamperVan::Channel do
       @room.sent.last.must_match /sup dude JD Wolk/
     end
 
+    it "does not convert names in words" do
+      @room.users = [
+        OpenStruct.new(:id => 11, :name => "JD Wolk", :email_address => "x@y.com"),
+        OpenStruct.new(:id => 12, :name => "Nathan", :email_address => "x@y.com")
+      ]
+      @channel.list_users
+
+      @channel.privmsg "sup dude jd_wolk and jonathan and nathan"
+      @room.sent.last.must_match /sup dude JD Wolk and jonathan and Nathan/
+
+    end
+
     it "converts various nicknames" do
       @room.users = [
         OpenStruct.new(:id => 11, :name => "JD Wolk", :email_address => "x@y.com"),
