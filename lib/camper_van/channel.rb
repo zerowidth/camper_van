@@ -117,11 +117,9 @@ module CamperVan
         # convert ACTIONs
         msg.sub! /^\01ACTION (.*)\01$/, '*\1*'
 
-        matched = users.values.detect do |user|
-          msg =~ /^#{Regexp.escape(user.nick)}($|\W+(\s|$))/
+        users.values.each do |user|
+          msg.sub!(/\b#{user.nick}\b/, user.name)
         end
-
-        msg = msg.sub(/^#{matched.nick}/, matched.name) if matched
 
         room.text(msg) { } # async, no-op callback
       end
