@@ -45,6 +45,7 @@ module CamperVan
       :err_notonchannel       => "442",
 
       :err_needmoreparams     => "461",
+      :err_subdomaininvalid   => "462",
       :err_passwdmismatch     => "464",
 
       :err_channelisfull      => "471", # room is full

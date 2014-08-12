@@ -66,6 +66,8 @@ connection and use `other_subdomain:other_api_key` for authentication.
 
 If your IRC client (mIRC) doesn't allow `:` in the password, you can use `-`.
 
+Note that you can also provide a list of subdomains to restrict the access to.
+
 ## Development
 
 CamperVan uses:
@@ -84,4 +86,3 @@ MIT, See LICENSE for details.
 ## Contributing
 
 Fork, patch, test, pull request.
-
