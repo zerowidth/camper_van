@@ -116,7 +116,7 @@ module CamperVan
         @subdomain = subdomain.split(".").first
 
         # if restricted to one subdomain, validate it
-        if !@options[:subdomain].nil? and @options[:subdomain].split(",").index(@subdomain) == nil
+        if !@options[:subdomain].nil? && @options[:subdomain].split(",").index(@subdomain) == nil
           numeric_reply :err_subdomaininvalid, ":domain #{@subdomain} is invalid"
           shutdown
         end
