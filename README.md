@@ -1,3 +1,4 @@
+[![Build Status](https://travis-ci.org/zerowidth/camper_van.svg?branch=master)](https://travis-ci.org/zerowidth/camper_van)
 # CamperVan, a Campfire to IRC bridge
 
 ## Features
