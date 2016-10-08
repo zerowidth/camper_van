@@ -23,13 +23,14 @@ module CamperVan
       args = []
       until line.empty? do
         line =~ /^(\S+)(\s|$)/
-        if $1
-          if $1.start_with?(":")
+        group = $1
+        if group 
+          if group.start_with?(":")
             args << line[1..-1]
             break
           else
-            args << $1
-            line = line[$1.size..-1]
+            args << group 
+            line = line[group.size..-1]
             line = line.sub(/^\s+/,"")
           end
         else
